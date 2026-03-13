@@ -23,7 +23,12 @@ const path        = require('path');
 
 // ── Clients ──────────────────────────────────────────────────────────────────
 const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
-const resend    = new Resend(process.env.RESEND_API_KEY);
+// Resend wird lazy initialisiert (erst beim ersten Aufruf)
+let _resend = null;
+function getResend() {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY);
+  return _resend;
+}
 const STL_DIR   = path.join(__dirname, 'stl');
 
 // ── Tool-Definitionen ─────────────────────────────────────────────────────────
@@ -127,7 +132,7 @@ async function executeTool(name, input) {
       ? `Deine STL-Datei: ${product_name} — Creative Lab Kohli`
       : `Your STL File: ${product_name} — Creative Lab Kohli`;
 
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResend().emails.send({
       from: process.env.FROM_EMAIL || 'noreply@creativelabkohli.ch',
       to,
       subject,
