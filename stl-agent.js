@@ -4,7 +4,7 @@
  * Ein Claude-Agent, der bei eingehender Bestellung:
  *  1. Den STL-Ordner nach passenden Dateien durchsucht
  *  2. Die richtige STL-Datei dem Produkt zuordnet
- *  3. Die Datei per E-Mail (Resend) an den Kunden sendet
+ *  3. Die Datei per E-Mail (Gmail SMTP) an den Kunden sendet
  *
  * Verwendung:
  *   node stl-agent.js
@@ -16,8 +16,8 @@
  */
 
 require('dotenv').config();
-const Anthropic = require('@anthropic-ai/sdk');
-const { Resend }  = require('resend');
+const Anthropic   = require('@anthropic-ai/sdk');
+const nodemailer  = require('nodemailer');
 const fs          = require('fs');
 const path        = require('path');
 
@@ -26,14 +26,18 @@ const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY 
 
 // Debug: Env-Variablen beim Start prüfen
 console.log('🔑 ANTHROPIC_API_KEY vorhanden:', !!process.env.ANTHROPIC_API_KEY, process.env.ANTHROPIC_API_KEY ? '('+process.env.ANTHROPIC_API_KEY.substring(0,10)+'...)' : 'FEHLT!');
-console.log('🔑 RESEND_API_KEY vorhanden:', !!process.env.RESEND_API_KEY, process.env.RESEND_API_KEY ? '('+process.env.RESEND_API_KEY.substring(0,6)+'...)' : 'FEHLT!');
-console.log('📧 FROM_EMAIL:', process.env.FROM_EMAIL || 'FEHLT!');
+console.log('📧 GMAIL_USER:', process.env.GMAIL_USER || 'FEHLT!');
+console.log('🔑 GMAIL_APP_PASSWORD vorhanden:', !!process.env.GMAIL_APP_PASSWORD);
 
-// Resend lazy initialisieren — liest Key erst beim Senden
-function getResend() {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error('RESEND_API_KEY nicht gesetzt');
-  return new Resend(key);
+// Gmail Transporter
+function createTransporter() {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
 }
 
 const STL_DIR   = path.join(__dirname, 'stl');
@@ -139,32 +143,27 @@ async function executeTool(name, input) {
       ? `Deine STL-Datei: ${product_name} — Creative Lab Kohli`
       : `Your STL File: ${product_name} — Creative Lab Kohli`;
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) return JSON.stringify({ error: 'RESEND_API_KEY fehlt' });
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      return JSON.stringify({ error: 'GMAIL_USER oder GMAIL_APP_PASSWORD fehlt' });
+    }
 
-    const body = JSON.stringify({
-      from: process.env.FROM_EMAIL || 'onboarding@resend.dev',
+    const transporter = createTransporter();
+    const mailOptions = {
+      from: `Creative Lab Kohli <${process.env.GMAIL_USER}>`,
       to,
       subject,
       html: emailHtml,
-      attachments: [{ filename: stl_filename, content: fileBuffer.toString('base64') }],
-    });
+      attachments: [{ filename: stl_filename, content: fileBuffer }],
+    };
 
-    const resp = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body,
-    });
-    const resData = await resp.json();
-    console.log('   Resend HTTP Status:', resp.status, JSON.stringify(resData));
-
-    if (!resp.ok) {
-      console.error('   ✗ Resend Fehler:', resData);
-      return JSON.stringify({ error: resData.message || JSON.stringify(resData) });
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`   ✓ E-Mail gesendet an ${to} (ID: ${info.messageId})`);
+      return JSON.stringify({ success: true, email_id: info.messageId, sent_to: to });
+    } catch (err) {
+      console.error('   ✗ Gmail Fehler:', err.message);
+      return JSON.stringify({ error: err.message });
     }
-
-    console.log(`   ✓ E-Mail gesendet an ${to} (ID: ${resData.id})`);
-    return JSON.stringify({ success: true, email_id: resData.id, sent_to: to });
   }
 
   return JSON.stringify({ error: `Unbekanntes Tool: ${name}` });
@@ -262,7 +261,7 @@ Bitte verarbeite diese Bestellung jetzt.`;
 // ── CLI-Test ──────────────────────────────────────────────────────────────────
 if (require.main === module) {
   // Prüfe ob alle nötigen Env-Vars gesetzt sind
-  const missing = ['ANTHROPIC_API_KEY', 'RESEND_API_KEY', 'FROM_EMAIL'].filter(
+  const missing = ['ANTHROPIC_API_KEY', 'GMAIL_USER', 'GMAIL_APP_PASSWORD'].filter(
     k => !process.env[k]
   );
   if (missing.length > 0) {
