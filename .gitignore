@@ -1,5 +1,5 @@
-# Umgebungsvariablen (niemals auf GitHub!)
-.env
+# .env ist im privaten Repo — für Produktion entfernen!
+# .env
 
 # Node.js
 node_modules/
