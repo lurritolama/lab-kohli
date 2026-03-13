@@ -25,17 +25,15 @@ const path        = require('path');
 const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // Debug: Env-Variablen beim Start prüfen
-const resendKey = process.env.RESEND_API_KEY;
-console.log('🔑 RESEND_API_KEY vorhanden:', !!resendKey, resendKey ? '('+resendKey.substring(0,6)+'...)' : 'FEHLT!');
+console.log('🔑 RESEND_API_KEY vorhanden:', !!process.env.RESEND_API_KEY, process.env.RESEND_API_KEY ? '('+process.env.RESEND_API_KEY.substring(0,6)+'...)' : 'FEHLT!');
 console.log('📧 FROM_EMAIL:', process.env.FROM_EMAIL || 'FEHLT!');
 
-if (!resendKey) {
-  console.error('❌ RESEND_API_KEY ist nicht gesetzt! E-Mail-Versand wird fehlschlagen.');
+// Resend lazy initialisieren — liest Key erst beim Senden
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error('RESEND_API_KEY nicht gesetzt');
+  return new Resend(key);
 }
-
-// Resend direkt initialisieren
-const resendInstance = new Resend(resendKey || 'missing');
-function getResend() { return resendInstance; }
 
 const STL_DIR   = path.join(__dirname, 'stl');
 
