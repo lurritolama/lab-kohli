@@ -17,6 +17,7 @@
 
 require('dotenv').config();
 const Anthropic   = require('@anthropic-ai/sdk');
+const JSZip       = require('jszip');
 const fs          = require('fs');
 const path        = require('path');
 
@@ -168,12 +169,18 @@ async function executeTool(name, input) {
       : `Your STL File: ${product_name} — Creative Lab Kohli`;
 
     try {
+      // STL in ZIP verpacken (Brevo blockiert .stl Anhänge)
+      const zip = new JSZip();
+      zip.file(stl_filename, fileBuffer);
+      const zipBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
+      const zipFilename = stl_filename.replace(/\.stl$/i, '.zip');
+
       const result = await sendBrevoEmail({
         to,
         subject,
         htmlContent,
-        attachmentBuffer: fileBuffer,
-        attachmentName: stl_filename,
+        attachmentBuffer: zipBuffer,
+        attachmentName: zipFilename,
       });
       console.log(`   ✓ E-Mail gesendet an ${to} (ID: ${result.messageId})`);
       return JSON.stringify({ success: true, email_id: result.messageId, sent_to: to });
