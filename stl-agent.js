@@ -25,6 +25,7 @@ const path        = require('path');
 const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // Debug: Env-Variablen beim Start prüfen
+console.log('🔑 ANTHROPIC_API_KEY vorhanden:', !!process.env.ANTHROPIC_API_KEY, process.env.ANTHROPIC_API_KEY ? '('+process.env.ANTHROPIC_API_KEY.substring(0,10)+'...)' : 'FEHLT!');
 console.log('🔑 RESEND_API_KEY vorhanden:', !!process.env.RESEND_API_KEY, process.env.RESEND_API_KEY ? '('+process.env.RESEND_API_KEY.substring(0,6)+'...)' : 'FEHLT!');
 console.log('📧 FROM_EMAIL:', process.env.FROM_EMAIL || 'FEHLT!');
 
