@@ -4,7 +4,7 @@
  * Ein Claude-Agent, der bei eingehender Bestellung:
  *  1. Den STL-Ordner nach passenden Dateien durchsucht
  *  2. Die richtige STL-Datei dem Produkt zuordnet
- *  3. Die Datei per E-Mail (Brevo SMTP) an den Kunden sendet
+ *  3. Die Datei per E-Mail (Brevo HTTP API) an den Kunden sendet
  *
  * Verwendung:
  *   node stl-agent.js
@@ -17,7 +17,6 @@
 
 require('dotenv').config();
 const Anthropic   = require('@anthropic-ai/sdk');
-const nodemailer  = require('nodemailer');
 const fs          = require('fs');
 const path        = require('path');
 
@@ -26,20 +25,39 @@ const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY 
 
 // Debug: Env-Variablen beim Start prüfen
 console.log('🔑 ANTHROPIC_API_KEY vorhanden:', !!process.env.ANTHROPIC_API_KEY, process.env.ANTHROPIC_API_KEY ? '('+process.env.ANTHROPIC_API_KEY.substring(0,10)+'...)' : 'FEHLT!');
-console.log('📧 BREVO_USER:', process.env.BREVO_USER || 'FEHLT!');
-console.log('🔑 BREVO_SMTP_KEY vorhanden:', !!process.env.BREVO_SMTP_KEY);
+console.log('📧 BREVO_API_KEY vorhanden:', !!process.env.BREVO_API_KEY);
+console.log('📧 BREVO_SENDER_EMAIL:', process.env.BREVO_SENDER_EMAIL || 'FEHLT!');
 
-// Brevo SMTP Transporter
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.BREVO_USER,
-      pass: process.env.BREVO_SMTP_KEY,
+// Brevo HTTP API E-Mail senden
+async function sendBrevoEmail({ to, subject, htmlContent, attachmentBuffer, attachmentName }) {
+  const body = {
+    sender: { name: 'Creative Lab Kohli', email: process.env.BREVO_SENDER_EMAIL },
+    to: [{ email: to }],
+    subject,
+    htmlContent,
+    attachment: [
+      {
+        content: attachmentBuffer.toString('base64'),
+        name: attachmentName,
+      },
+    ],
+  };
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+      'content-type': 'application/json',
     },
+    body: JSON.stringify(body),
   });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(`Brevo API Fehler ${response.status}: ${JSON.stringify(data)}`);
+  }
+  return data;
 }
 
 const STL_DIR   = path.join(__dirname, 'stl');
@@ -118,10 +136,14 @@ async function executeTool(name, input) {
       return JSON.stringify({ error: `Datei nicht gefunden: ${stl_filename}` });
     }
 
+    if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
+      return JSON.stringify({ error: 'BREVO_API_KEY oder BREVO_SENDER_EMAIL fehlt' });
+    }
+
     const fileBuffer = fs.readFileSync(filePath);
     const isDE = lang !== 'en';
 
-    const emailHtml = isDE
+    const htmlContent = isDE
       ? `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <h2 style="color:#00f5ff">Deine STL-Datei ist da! 🎉</h2>
@@ -145,23 +167,16 @@ async function executeTool(name, input) {
       ? `Deine STL-Datei: ${product_name} — Creative Lab Kohli`
       : `Your STL File: ${product_name} — Creative Lab Kohli`;
 
-    if (!process.env.BREVO_USER || !process.env.BREVO_SMTP_KEY) {
-      return JSON.stringify({ error: 'BREVO_USER oder BREVO_SMTP_KEY fehlt' });
-    }
-
-    const transporter = createTransporter();
-    const mailOptions = {
-      from: `Creative Lab Kohli <${process.env.BREVO_USER}>`,
-      to,
-      subject,
-      html: emailHtml,
-      attachments: [{ filename: stl_filename, content: fileBuffer }],
-    };
-
     try {
-      const info = await transporter.sendMail(mailOptions);
-      console.log(`   ✓ E-Mail gesendet an ${to} (ID: ${info.messageId})`);
-      return JSON.stringify({ success: true, email_id: info.messageId, sent_to: to });
+      const result = await sendBrevoEmail({
+        to,
+        subject,
+        htmlContent,
+        attachmentBuffer: fileBuffer,
+        attachmentName: stl_filename,
+      });
+      console.log(`   ✓ E-Mail gesendet an ${to} (ID: ${result.messageId})`);
+      return JSON.stringify({ success: true, email_id: result.messageId, sent_to: to });
     } catch (err) {
       console.error('   ✗ Brevo Fehler:', err.message);
       return JSON.stringify({ error: err.message });
@@ -263,7 +278,7 @@ Bitte verarbeite diese Bestellung jetzt.`;
 // ── CLI-Test ──────────────────────────────────────────────────────────────────
 if (require.main === module) {
   // Prüfe ob alle nötigen Env-Vars gesetzt sind
-  const missing = ['ANTHROPIC_API_KEY', 'BREVO_USER', 'BREVO_SMTP_KEY'].filter(
+  const missing = ['ANTHROPIC_API_KEY', 'BREVO_API_KEY', 'BREVO_SENDER_EMAIL'].filter(
     k => !process.env[k]
   );
   if (missing.length > 0) {
