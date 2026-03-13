@@ -4,7 +4,7 @@
  * Ein Claude-Agent, der bei eingehender Bestellung:
  *  1. Den STL-Ordner nach passenden Dateien durchsucht
  *  2. Die richtige STL-Datei dem Produkt zuordnet
- *  3. Die Datei per E-Mail (Gmail SMTP) an den Kunden sendet
+ *  3. Die Datei per E-Mail (Brevo SMTP) an den Kunden sendet
  *
  * Verwendung:
  *   node stl-agent.js
@@ -26,16 +26,18 @@ const anthropic = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY 
 
 // Debug: Env-Variablen beim Start prüfen
 console.log('🔑 ANTHROPIC_API_KEY vorhanden:', !!process.env.ANTHROPIC_API_KEY, process.env.ANTHROPIC_API_KEY ? '('+process.env.ANTHROPIC_API_KEY.substring(0,10)+'...)' : 'FEHLT!');
-console.log('📧 GMAIL_USER:', process.env.GMAIL_USER || 'FEHLT!');
-console.log('🔑 GMAIL_APP_PASSWORD vorhanden:', !!process.env.GMAIL_APP_PASSWORD);
+console.log('📧 BREVO_USER:', process.env.BREVO_USER || 'FEHLT!');
+console.log('🔑 BREVO_SMTP_KEY vorhanden:', !!process.env.BREVO_SMTP_KEY);
 
-// Gmail Transporter
+// Brevo SMTP Transporter
 function createTransporter() {
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
     auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
+      user: process.env.BREVO_USER,
+      pass: process.env.BREVO_SMTP_KEY,
     },
   });
 }
@@ -143,13 +145,13 @@ async function executeTool(name, input) {
       ? `Deine STL-Datei: ${product_name} — Creative Lab Kohli`
       : `Your STL File: ${product_name} — Creative Lab Kohli`;
 
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      return JSON.stringify({ error: 'GMAIL_USER oder GMAIL_APP_PASSWORD fehlt' });
+    if (!process.env.BREVO_USER || !process.env.BREVO_SMTP_KEY) {
+      return JSON.stringify({ error: 'BREVO_USER oder BREVO_SMTP_KEY fehlt' });
     }
 
     const transporter = createTransporter();
     const mailOptions = {
-      from: `Creative Lab Kohli <${process.env.GMAIL_USER}>`,
+      from: `Creative Lab Kohli <${process.env.BREVO_USER}>`,
       to,
       subject,
       html: emailHtml,
@@ -161,7 +163,7 @@ async function executeTool(name, input) {
       console.log(`   ✓ E-Mail gesendet an ${to} (ID: ${info.messageId})`);
       return JSON.stringify({ success: true, email_id: info.messageId, sent_to: to });
     } catch (err) {
-      console.error('   ✗ Gmail Fehler:', err.message);
+      console.error('   ✗ Brevo Fehler:', err.message);
       return JSON.stringify({ error: err.message });
     }
   }
@@ -261,7 +263,7 @@ Bitte verarbeite diese Bestellung jetzt.`;
 // ── CLI-Test ──────────────────────────────────────────────────────────────────
 if (require.main === module) {
   // Prüfe ob alle nötigen Env-Vars gesetzt sind
-  const missing = ['ANTHROPIC_API_KEY', 'GMAIL_USER', 'GMAIL_APP_PASSWORD'].filter(
+  const missing = ['ANTHROPIC_API_KEY', 'BREVO_USER', 'BREVO_SMTP_KEY'].filter(
     k => !process.env[k]
   );
   if (missing.length > 0) {
