@@ -1,5 +1,5 @@
 /**
- * STL-Agent — Proof of Concept
+ * STL-Agent — Proof of Concept v2
  * ─────────────────────────────────────────────────────────────────────────────
  * Ein Claude-Agent, der bei eingehender Bestellung:
  *  1. Den STL-Ordner nach passenden Dateien durchsucht
