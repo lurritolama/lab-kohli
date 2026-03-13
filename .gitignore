@@ -1,0 +1,13 @@
+# Umgebungsvariablen (niemals auf GitHub!)
+.env
+
+# Node.js
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

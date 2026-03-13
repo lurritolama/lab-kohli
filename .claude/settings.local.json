@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \":*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\lurri\\\\Desktop\\\\Lab Kohli\\\\fix2.ps1\")",
+      "Bash(where npx:*)",
+      "Bash(where python:*)",
+      "Bash(where python3:*)",
+      "Bash(where node:*)",
+      "Bash(where php:*)",
+      "Bash(where ruby:*)",
+      "Read(//c/Windows/System32/WindowsPowerShell/v1.0/**)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\lurri\\\\Desktop\\\\Lab Kohli\\\\replace_logo.ps1\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\lurri\\\\Desktop\\\\Lab Kohli\\\\save_logo.ps1\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\lurri\\\\Desktop\\\\Lab Kohli\\\\fix-vkbrett.ps1\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\lurri\\\\Desktop\\\\Lab Kohli\\\\embed-vkbrett.ps1\")"
+    ]
+  }
+}
