@@ -1,5 +1,5 @@
-# .env ist im privaten Repo — für Produktion entfernen!
-# .env
+# .env niemals in Git!
+.env
 
 # Node.js
 node_modules/

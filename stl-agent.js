@@ -15,7 +15,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-require('dotenv').config({ override: true });
+require('dotenv').config();
 const Anthropic = require('@anthropic-ai/sdk');
 const { Resend }  = require('resend');
 const fs          = require('fs');

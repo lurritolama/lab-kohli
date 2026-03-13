@@ -7,7 +7,7 @@
  * Öffnen:  http://localhost:3000
  */
 
-require('dotenv').config({ override: true });
+require('dotenv').config();
 const express        = require('express');
 const path           = require('path');
 const { processOrder } = require('./stl-agent');
