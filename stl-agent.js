@@ -138,26 +138,32 @@ async function executeTool(name, input) {
       ? `Deine STL-Datei: ${product_name} — Creative Lab Kohli`
       : `Your STL File: ${product_name} — Creative Lab Kohli`;
 
-    const { data, error } = await getResend().emails.send({
-      from: process.env.FROM_EMAIL || 'noreply@creativelabkohli.ch',
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return JSON.stringify({ error: 'RESEND_API_KEY fehlt' });
+
+    const body = JSON.stringify({
+      from: process.env.FROM_EMAIL || 'onboarding@resend.dev',
       to,
       subject,
       html: emailHtml,
-      attachments: [
-        {
-          filename: stl_filename,
-          content: fileBuffer,
-        },
-      ],
+      attachments: [{ filename: stl_filename, content: fileBuffer.toString('base64') }],
     });
 
-    if (error) {
-      console.error('   ✗ Resend Fehler:', error);
-      return JSON.stringify({ error: error.message });
+    const resp = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body,
+    });
+    const resData = await resp.json();
+    console.log('   Resend HTTP Status:', resp.status, JSON.stringify(resData));
+
+    if (!resp.ok) {
+      console.error('   ✗ Resend Fehler:', resData);
+      return JSON.stringify({ error: resData.message || JSON.stringify(resData) });
     }
 
-    console.log(`   ✓ E-Mail gesendet an ${to} (ID: ${data.id})`);
-    return JSON.stringify({ success: true, email_id: data.id, sent_to: to });
+    console.log(`   ✓ E-Mail gesendet an ${to} (ID: ${resData.id})`);
+    return JSON.stringify({ success: true, email_id: resData.id, sent_to: to });
   }
 
   return JSON.stringify({ error: `Unbekanntes Tool: ${name}` });
