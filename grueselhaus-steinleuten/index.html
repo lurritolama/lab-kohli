@@ -560,6 +560,57 @@
   }
   #highscores-btn:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 12px var(--neon-green); }
 
+  /* ── STORY TICKER ── */
+  #story-ticker {
+    display: none;
+    text-align: center;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+    font-family: 'Creepster', cursive;
+    font-size: clamp(13px, 2.5vw, 17px);
+    color: #cc88ff;
+    text-shadow: 0 0 8px #bf00ff;
+    background: rgba(50, 0, 80, 0.5);
+    border: 1px solid #bf00ff55;
+    border-radius: 8px;
+    animation: story-in 0.6s ease-out;
+    min-height: 38px;
+  }
+  @keyframes story-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RAMPAGE OVERLAY ── */
+  #rampage-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 80;
+    background: rgba(160, 0, 0, 0.75);
+    align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .rampage-text {
+    font-family: 'Creepster', cursive;
+    font-size: clamp(32px, 8vw, 72px);
+    color: #fff;
+    text-shadow: 0 0 20px #ff0040, 0 0 60px #ff004099;
+    text-align: center;
+    letter-spacing: 4px;
+    animation: rampage-scale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes rampage-scale {
+    from { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .rampage-reel {
+    border: 2px solid var(--neon-red) !important;
+    animation: rampage-reel-glow 0.3s infinite alternate !important;
+  }
+  @keyframes rampage-reel-glow {
+    from { box-shadow: 0 0 15px var(--neon-red); }
+    to   { box-shadow: 0 0 40px var(--neon-red), inset 0 0 30px #ff004055; }
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     .reel-wrap { height: 264px; }
@@ -608,7 +659,9 @@
   </div>
 
   <!-- Freespins Banner -->
-  <div id="freespins-banner">🎰 FREISPIELE AKTIV: <span id="fs-count">0</span> verbleibend! 🎰</div>
+  <div id="freespins-banner">🎰 FREISPIELE: <span id="fs-count">0</span> verbleibend · 🔥 ×2 FLUCH-GEWINN! 🎰</div>
+  <!-- Story Ticker (während Freispiele) -->
+  <div id="story-ticker"></div>
 
   <!-- Machine -->
   <div class="machine">
@@ -661,6 +714,11 @@
   </div>
 </div>
 
+<!-- Zombie Rampage Overlay -->
+<div id="rampage-overlay">
+  <div class="rampage-text">⚡ ZOMBIE RAMPAGE! ⚡<br><span style="font-size:0.5em;color:#ffaaaa">Eine Walze dreht durch!</span></div>
+</div>
+
 <!-- Win Celebration Overlay -->
 <div id="win-celebration">
   <div class="win-cel-card">
@@ -706,7 +764,7 @@ const SYMBOLS = [
   { id: 'joint',     label: 'Joint/CBD', type: 'img',   src: 'images/joint.jpg',     weight: 3, wild: true },
   { id: 'bier',      label: 'Bier',      type: 'img',   src: 'images/bier.jpg',      weight: 8 },
   { id: 'slot',      label: 'Slot',      type: 'img',   src: 'images/slot.jpg',      weight: 2, scatter: true },
-  { id: 'skull',     label: 'Totenkopf', type: 'emoji', emoji: '💀',                weight: 18 },
+  { id: 'skull',     label: 'Totenkopf', type: 'emoji', emoji: '💀',                weight: 11 },
 ];
 
 const REELS = 5;
@@ -761,6 +819,28 @@ let currentBet = 10;
 let freeSpins  = 0;
 let spinning   = false;
 let grid       = []; // grid[col][row]
+
+// Special feature state
+let freeSpinMultiplier = 1;
+let freeSpinStoryIdx   = 0;
+let rampageReel        = -1;
+let rampageActive      = false;
+
+// ============================================================
+// FREISPIN STORY — Die Geschichte des Grüselhauses
+// ============================================================
+const FS_STORY = [
+  "💀 Das Haus Steinleuten erwacht... Drei Männer verschwanden hier spurlos.",
+  "🧟 Cristiano betrat als Erster die Schwelle. Sein Körper verschmolz mit der alten Technik des Kellers.",
+  "🧟 Senderos folgte. Er trug noch seinen Beanie, als der Fluch ihn ergriff. Er erinnert sich an nichts mehr.",
+  "🧟 Benno war der Letzte. Seine Brille blieb unversehrt — nur er selbst nicht.",
+  "🏚️ Nun regieren sie das Grüselhaus zu dritt. Der Joint hält die Geister ruhig. Das Bier gärt seit '87.",
+  "👁️ Die Wände beobachten dich. Das Haus wählt seine nächsten Bewohner sehr sorgfältig.",
+  "🌿 Der Rauch liegt schwer in der Luft. Zeit verliert ihre Bedeutung hier drin.",
+  "🍺 Das Bier im Keller hat eine eigene Stimme. Wer trinkt, bleibt für immer.",
+  "🏚️ Kein Ausgang mehr. Nur noch Walzen. Dreh weiter... das Haus braucht dich.",
+  "💀 Du bist jetzt Teil der Geschichte. Willkommen, neuer Bewohner des Grüselhauses Steinleuten.",
+];
 
 // ============================================================
 // BUILD REELS DOM
@@ -911,6 +991,16 @@ function soundScatter() {
   makeNoise(0.06, 0.08, 0.9);
 }
 
+// Zombie Rampage: brutaler Einschlag
+function soundRampage() {
+  makeNoise(0.12, 0.4);
+  playTone(40, 'sawtooth', 1.0, 0.3);
+  makeSweep(150, 900, 0.4, 0.18, 'sawtooth', 0.04);
+  makeSweep(900, 150, 0.5, 0.12, 'sine', 0.3);
+  playTone(80, 'sine', 0.7, 0.15, 0.15);
+  makeNoise(0.08, 0.2, 0.2);
+}
+
 // Zufälliges Knarren / Knacken im Hintergrund
 function soundCreak() {
   const r = Math.random();
@@ -954,10 +1044,20 @@ function doSpin() {
   document.getElementById('spin-btn').disabled = true;
   clearWinHighlights();
 
+  // Zombie Rampage: 5% Chance (auch während Freispiele)
+  rampageActive = Math.random() < 0.05;
+  rampageReel   = rampageActive ? Math.floor(Math.random() * REELS) : -1;
+  if (rampageActive) triggerRampageEffect();
+
   if (freeSpins > 0) {
     freeSpins--;
+    freeSpinMultiplier = 2; // Fluch-Multiplikator ×2
+    showStoryChapter(freeSpinStoryIdx % FS_STORY.length);
+    freeSpinStoryIdx++;
     updateFSBanner();
   } else {
+    freeSpinMultiplier = 1;
+    hideStoryChapter();
     balance -= currentBet;
     updateHUD();
     saveCurrentPlayer();
@@ -966,11 +1066,13 @@ function doSpin() {
   document.getElementById('win-display').innerHTML = '';
   soundSpin();
 
-  // Generate final grid results
+  // Generate final grid — rampage reel → all wild
   const newGrid = [];
   for (let c = 0; c < REELS; c++) {
     const col = [];
-    for (let r = 0; r < ROWS; r++) col.push(randSym());
+    for (let r = 0; r < ROWS; r++) {
+      col.push(rampageActive && c === rampageReel ? 'joint' : randSym());
+    }
     newGrid.push(col);
   }
 
@@ -979,7 +1081,9 @@ function doSpin() {
   for (let c = 0; c < REELS; c++) {
     const reel = reelEls[c];
     reel.classList.add('spinning', 'blur-spinning');
-
+    if (rampageActive && c === rampageReel) {
+      document.getElementById(`reel-wrap-${c}`).classList.add('rampage-reel');
+    }
     setTimeout(() => {
       stopReel(c, newGrid[c]);
     }, 800 + c * stopDelay);
@@ -1025,7 +1129,7 @@ function evaluateWin() {
 
     // Find first real symbol (no wild, no skull — skull never wins)
     const first = syms.find(s => s !== 'joint' && s !== 'skull') || null;
-    if (!first) return; // all skulls/wilds → no win
+    if (!first) return;
 
     // Count consecutive matches from left (wilds count, skulls break chain)
     let count = 0;
@@ -1044,16 +1148,51 @@ function evaluateWin() {
     }
   });
 
-  // Scatter / freespins
+  // Apply Fluch-Multiplikator during free spins
+  if (freeSpinMultiplier > 1 && totalWin > 0) {
+    totalWin = Math.round(totalWin * freeSpinMultiplier);
+  }
+
+  // Scatter → Freispiele (oder Retrigger)
   if (scatterCount >= 3) {
-    freeSpins += 5;
+    const wasInFS  = freeSpins > 0;
+    const newSpins = scatterCount >= 5 ? 10 : scatterCount >= 4 ? 7 : 5;
+    freeSpins += newSpins;
+    freeSpinStoryIdx = 0; // Geschichte von vorne
     updateFSBanner();
     soundScatter();
-    showWinText('🎰 SCATTER! 5 FREISPIELE! 🎰', false, true);
+    const msg = wasInFS
+      ? `🔁 RETRIGGER! +${newSpins} FREISPIELE! 🔁`
+      : `🎰 SCATTER! ${newSpins} FREISPIELE! 🎰`;
+    showWinText(msg, false, true);
     setTimeout(() => {
       if (totalWin > 0) resolveWin(totalWin, winningLines, isJackpot);
     }, 1200);
     return;
+  }
+
+  // Geisterhände: Bei Fast-Gewinn 15% Chance auf kleinen Bonus
+  if (totalWin === 0 && !rampageActive) {
+    let nearMiss = false;
+    for (const line of PAYLINES) {
+      const syms = line.map((row, col) => grid[col][row]);
+      const first = syms.find(s => s !== 'joint' && s !== 'skull');
+      if (!first) continue;
+      let count = 0;
+      for (let i = 0; i < syms.length; i++) {
+        if (syms[i] === first || syms[i] === 'joint') count++;
+        else break;
+      }
+      if (count === 2) { nearMiss = true; break; }
+    }
+    if (nearMiss && Math.random() < 0.15) {
+      const nudgeWin = currentBet;
+      balance += nudgeWin;
+      updateHUD(nudgeWin);
+      showWinText(`👻 GEISTERHÄNDE! +${nudgeWin} CHZINU`, false);
+      saveCurrentPlayer();
+      return;
+    }
   }
 
   resolveWin(totalWin, winningLines, isJackpot);
@@ -1064,12 +1203,13 @@ function resolveWin(totalWin, winningLines, isJackpot) {
     balance += totalWin;
     updateHUD(totalWin);
     highlightWinningCells(winningLines);
+    const multTag = freeSpinMultiplier > 1 ? ` 🔥×${freeSpinMultiplier}` : '';
     if (isJackpot) {
       soundJackpot();
-      showWinText(`💥 JACKPOT! +${totalWin} CHZINU 💥`, true);
+      showWinText(`💥 JACKPOT! +${totalWin} CHZINU${multTag} 💥`, true);
     } else {
       soundWin();
-      showWinText(`🏆 GEWINN! +${totalWin} CHZINU`, false);
+      showWinText(`🏆 GEWINN! +${totalWin} CHZINU${multTag}`, false);
     }
     showWinCelebration(winningLines, totalWin, isJackpot);
   } else {
@@ -1155,7 +1295,7 @@ function highlightWinningCells(winningLines) {
 function clearWinHighlights() {
   for (let c = 0; c < REELS; c++) {
     const wrap = document.getElementById(`reel-wrap-${c}`);
-    if (wrap) wrap.classList.remove('win-highlight');
+    if (wrap) { wrap.classList.remove('win-highlight'); wrap.classList.remove('rampage-reel'); }
     const reel = reelEls[c];
     reel.querySelectorAll('.cell').forEach(cell => cell.classList.remove('win-cell'));
   }
@@ -1179,7 +1319,32 @@ function updateFSBanner() {
     document.getElementById('fs-count').textContent = freeSpins;
   } else {
     banner.style.display = 'none';
+    hideStoryChapter();
+    freeSpinStoryIdx = 0;
   }
+}
+
+// ============================================================
+// STORY / RAMPAGE HELPERS
+// ============================================================
+function showStoryChapter(idx) {
+  const ticker = document.getElementById('story-ticker');
+  ticker.style.display = 'block';
+  ticker.style.animation = 'none';
+  void ticker.offsetWidth; // reflow to restart animation
+  ticker.style.animation = '';
+  ticker.textContent = FS_STORY[idx];
+}
+
+function hideStoryChapter() {
+  document.getElementById('story-ticker').style.display = 'none';
+}
+
+function triggerRampageEffect() {
+  soundRampage();
+  const overlay = document.getElementById('rampage-overlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => { overlay.style.display = 'none'; }, 1300);
 }
 
 // ============================================================
@@ -1210,9 +1375,13 @@ function buildPaytable() {
     </div>`;
   });
 
-  html += `<div style="margin-top:12px;font-size:12px;color:#888">
-    Alle Gewinne = Anzahl × Einsatz-Multiplikator.<br>
-    9 Gewinnlinien aktiv. WILD ersetzt alle außer SCATTER.
+  html += `<div style="margin-top:12px;font-size:12px;color:#888;line-height:1.7">
+    Alle Gewinne = Anzahl × Einsatz-Multiplikator. 9 Gewinnlinien aktiv.<br>
+    🌿 WILD ersetzt alle außer SCATTER.<br>
+    🎰 SCATTER: 3=5 · 4=7 · 5=10 Freispiele (Retrigger möglich!)<br>
+    🔥 Freispiele: Alle Gewinne ×2 (Fluch-Multiplikator)<br>
+    ⚡ ZOMBIE RAMPAGE: 5% Chance — eine Walze dreht komplett wild!<br>
+    👻 GEISTERHÄNDE: Fast-Gewinn? Die Geister helfen manchmal nach.
   </div>`;
 
   document.getElementById('paytable-content').innerHTML = html;
