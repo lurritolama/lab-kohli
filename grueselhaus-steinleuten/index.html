@@ -343,34 +343,38 @@
     display: flex; gap: 6px; justify-content: center;
     align-items: center; flex-wrap: wrap;
     margin-top: 12px; padding-top: 10px;
-    border-top: 1px solid #1a1a2e;
+    border-top: 1px solid #2a1a3a;
   }
-  .ap-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+  .ap-label {
+    font-size: 12px; color: var(--neon-purple);
+    text-transform: uppercase; letter-spacing: 1px;
+    text-shadow: 0 0 6px var(--neon-purple);
+  }
   .ap-btn {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid #333; color: #666;
-    border-radius: 8px; padding: 5px 10px;
+    background: rgba(191,0,255,0.12);
+    border: 1px solid var(--neon-purple); color: var(--neon-purple);
+    border-radius: 8px; padding: 5px 12px;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 13px; font-weight: 700;
+    font-size: 14px; font-weight: 700;
     cursor: pointer; transition: all 0.2s;
   }
-  .ap-btn:hover { border-color: var(--neon-green); color: var(--neon-green); }
+  .ap-btn:hover { background: rgba(191,0,255,0.25); box-shadow: 0 0 8px var(--neon-purple); }
   .ap-btn.active {
-    background: rgba(57,255,20,0.15);
-    border-color: var(--neon-green); color: var(--neon-green);
-    box-shadow: 0 0 8px #39ff1440;
+    background: var(--neon-purple); color: #fff;
+    box-shadow: 0 0 14px var(--neon-purple);
   }
   #ap-stop-btn {
     display: none;
     background: rgba(255,0,64,0.2); border: 1px solid var(--neon-red);
     color: var(--neon-red); border-radius: 8px; padding: 5px 14px;
-    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700;
+    font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700;
     cursor: pointer; transition: all 0.2s;
   }
   #ap-stop-btn:hover { background: var(--neon-red); color: #fff; }
   #ap-count-display {
     display: none; font-size: 13px; color: var(--neon-green);
     font-family: 'Rajdhani', sans-serif; white-space: nowrap;
+    text-shadow: 0 0 6px var(--neon-green);
   }
 
   /* ── RAMPAGE OVERLAY ── */
@@ -836,7 +840,7 @@ const SYMBOLS = [
   { id: 'joint',     label: 'Joint/CBD', type: 'img',   src: 'images/joint.jpg',     weight: 3, wild: true },
   { id: 'bier',      label: 'Bier',      type: 'img',   src: 'images/bier.jpg',      weight: 9 },
   { id: 'slot',      label: 'Slot',      type: 'img',   src: 'images/slot.jpg',      weight: 2, scatter: true },
-  { id: 'skull',     label: 'Totenkopf', type: 'emoji', emoji: '💀',                weight: 7 },
+  { id: 'skull',     label: 'Totenkopf', type: 'emoji', emoji: '💀',                weight: 14 },
 ];
 
 const REELS = 5;
