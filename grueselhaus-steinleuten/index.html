@@ -29,17 +29,37 @@
     position: fixed; inset: 0; z-index: 0;
     background: url('images/haus.png') center bottom/cover no-repeat;
     filter: brightness(0.55) saturate(0.75) contrast(1.1);
+    transition: filter 1s ease;
   }
-
   #bg::after {
     content: '';
     position: absolute; inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(5, 0, 20, 0.55) 0%,
-      rgba(10, 0, 30, 0.3) 40%,
-      rgba(5, 0, 20, 0.55) 100%
-    );
+    background: linear-gradient(to bottom, rgba(5,0,20,0.55) 0%, rgba(10,0,30,0.3) 40%, rgba(5,0,20,0.55) 100%);
+    transition: background 1s ease;
+  }
+
+  /* ── FREESPIN MODE ── */
+  body.freespin-mode #bg {
+    filter: brightness(0.35) saturate(0.4) contrast(1.4) hue-rotate(-15deg);
+  }
+  body.freespin-mode #bg::after {
+    background: linear-gradient(to bottom, rgba(100,0,0,0.7) 0%, rgba(60,0,0,0.45) 50%, rgba(100,0,0,0.7) 100%);
+  }
+  body.freespin-mode .machine {
+    border-color: var(--neon-red) !important;
+    box-shadow: 0 0 50px #ff004099, inset 0 0 40px rgba(255,0,20,0.08) !important;
+  }
+  body.freespin-mode .hud {
+    border-color: var(--neon-red);
+    box-shadow: 0 0 15px #ff004044;
+  }
+  body.freespin-mode #spin-btn {
+    background: linear-gradient(135deg, #990000, #dd0000);
+    animation: freespin-btn-pulse 0.7s infinite !important;
+  }
+  @keyframes freespin-btn-pulse {
+    0%,100% { box-shadow: 0 0 25px #ff0040aa; transform: scale(1); }
+    50%      { box-shadow: 0 0 60px #ff0040ff, 0 0 100px #ff004066; transform: scale(1.04); }
   }
 
   .container {
@@ -51,7 +71,6 @@
 
   /* ── TITLE ── */
   .title-wrap { text-align: center; margin-bottom: 10px; }
-
   .title {
     font-family: 'Creepster', cursive;
     font-size: clamp(28px, 6vw, 52px);
@@ -60,7 +79,6 @@
     animation: glitch 3s infinite;
     letter-spacing: 2px;
   }
-
   .subtitle {
     font-family: 'Creepster', cursive;
     font-size: clamp(13px, 2.5vw, 18px);
@@ -69,7 +87,6 @@
     margin-top: 4px;
     letter-spacing: 1px;
   }
-
   @keyframes glitch {
     0%,90%,100% { text-shadow: 0 0 10px var(--neon-green), 0 0 30px var(--neon-green); transform: skewX(0); }
     91% { text-shadow: -3px 0 var(--neon-red), 3px 0 var(--neon-purple); transform: skewX(-4deg); }
@@ -79,7 +96,7 @@
     98% { text-shadow: 0 0 10px var(--neon-green), 0 0 30px var(--neon-green); transform: skewX(0); }
   }
 
-  /* ── BALANCE / BET ── */
+  /* ── HUD ── */
   .hud {
     display: flex; flex-wrap: wrap;
     justify-content: space-between; align-items: center;
@@ -92,8 +109,8 @@
     padding: 10px 16px;
     margin-bottom: 14px;
     box-shadow: 0 0 15px #39ff1440;
+    transition: border-color 0.8s, box-shadow 0.8s;
   }
-
   .hud-block { display: flex; flex-direction: column; gap: 2px; }
   .hud-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
   .hud-value { font-size: 22px; font-weight: 700; color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); }
@@ -106,14 +123,11 @@
     border-radius: 8px;
     padding: 6px 14px;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
   }
   .bet-btn:hover, .bet-btn.active {
-    background: var(--neon-purple);
-    color: #fff;
+    background: var(--neon-purple); color: #fff;
     box-shadow: 0 0 12px var(--neon-purple);
   }
 
@@ -121,18 +135,74 @@
   #freespins-banner {
     display: none;
     text-align: center;
-    background: linear-gradient(90deg, #bf00ff33, #39ff1433, #bf00ff33);
-    border: 1px solid var(--neon-green);
+    background: linear-gradient(90deg, #8b000044, #ff004033, #8b000044);
+    border: 1px solid var(--neon-red);
     border-radius: 10px;
     padding: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     font-family: 'Creepster', cursive;
     font-size: 20px;
-    color: var(--neon-green);
-    text-shadow: 0 0 10px var(--neon-green);
-    animation: pulse-banner 1s infinite alternate;
+    color: #ff6666;
+    text-shadow: 0 0 10px #ff0040;
+    animation: fs-pulse 0.8s infinite alternate;
   }
-  @keyframes pulse-banner { from { opacity: 0.8; } to { opacity: 1; box-shadow: 0 0 20px var(--neon-green); } }
+  @keyframes fs-pulse { from { opacity: 0.8; } to { opacity: 1; box-shadow: 0 0 25px #ff004066; } }
+
+  /* ── STORY TICKER ── */
+  #story-ticker {
+    display: none;
+    text-align: center;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+    font-family: 'Creepster', cursive;
+    font-size: clamp(13px, 2.5vw, 17px);
+    color: #ff9999;
+    text-shadow: 0 0 8px #ff0040;
+    background: rgba(80, 0, 0, 0.5);
+    border: 1px solid #ff004044;
+    border-radius: 8px;
+    animation: story-in 0.6s ease-out;
+    min-height: 38px;
+  }
+  @keyframes story-in {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── FLUCH-METER ── */
+  #fluch-meter-wrap {
+    display: none;
+    margin-bottom: 8px;
+    padding: 8px 14px;
+    background: rgba(60, 0, 0, 0.5);
+    border: 1px solid #ff004055;
+    border-radius: 8px;
+  }
+  .fluch-header {
+    display: flex; justify-content: space-between;
+    font-family: 'Creepster', cursive;
+    font-size: 13px; color: #ff6666;
+    margin-bottom: 5px;
+  }
+  .fluch-bar-bg {
+    background: #1a0000; border-radius: 6px; height: 12px;
+    overflow: hidden; border: 1px solid #440000;
+  }
+  .fluch-bar {
+    height: 100%; border-radius: 6px;
+    background: linear-gradient(90deg, #880000, #ff0040, #ff6600);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px #ff0040;
+    width: 0%;
+  }
+  #fluch-active-text {
+    display: none;
+    font-family: 'Creepster', cursive;
+    font-size: 15px; color: #ff4444;
+    text-shadow: 0 0 10px #ff0040;
+    text-align: center; margin-top: 5px;
+    animation: tap-blink 0.4s infinite;
+  }
 
   /* ── SLOT MACHINE ── */
   .machine {
@@ -144,36 +214,23 @@
     padding: 16px;
     box-shadow: 0 0 30px #bf00ff55, inset 0 0 30px rgba(0,0,0,0.3);
     margin-bottom: 14px;
+    transition: border-color 0.8s, box-shadow 0.8s;
   }
-
   .reels-container {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    margin-bottom: 14px;
-    position: relative;
+    display: flex; gap: 6px; justify-content: center;
+    margin-bottom: 14px; position: relative;
   }
-
   .reel-wrap {
-    flex: 1;
-    max-width: 160px;
-    height: 330px;
-    overflow: hidden;
-    border-radius: 10px;
-    border: 1px solid #444;
-    background: var(--reel-bg);
+    flex: 1; max-width: 160px; height: 330px;
+    overflow: hidden; border-radius: 10px;
+    border: 1px solid #444; background: var(--reel-bg);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    position: relative;
+    position: relative; transition: border-color 0.5s;
   }
-
-  /* highlight overlay for winning lines */
   .reel-wrap::before {
-    content: '';
-    position: absolute; inset: 0;
-    border-radius: 10px;
-    pointer-events: none;
-    z-index: 5;
+    content: ''; position: absolute; inset: 0;
+    border-radius: 10px; pointer-events: none; z-index: 5;
     transition: box-shadow 0.3s;
   }
   .reel-wrap.win-highlight::before {
@@ -181,76 +238,54 @@
     animation: reel-blink 0.6s infinite alternate;
   }
   @keyframes reel-blink { from { opacity: 0.5; } to { opacity: 1; } }
-
-  .reel {
-    display: flex;
-    flex-direction: column;
-    will-change: transform;
-  }
-
+  .reel { display: flex; flex-direction: column; will-change: transform; }
   .cell {
-    height: 110px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    border-bottom: 1px solid #1a1a2e;
-    user-select: none;
+    height: 110px; display: flex;
+    align-items: center; justify-content: center;
+    flex-shrink: 0; border-bottom: 1px solid #1a1a2e; user-select: none;
   }
-
   .cell img {
-    width: 80px; height: 80px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 2px solid #333;
-    pointer-events: none;
+    width: 80px; height: 80px; object-fit: cover;
+    border-radius: 10px; border: 2px solid #333; pointer-events: none;
   }
-
   .cell .emoji-sym {
-    font-size: 58px;
-    line-height: 1;
+    font-size: 58px; line-height: 1;
     filter: drop-shadow(0 0 6px rgba(255,255,255,0.3));
   }
-
-  /* Spin animation */
-  .reel.spinning {
-    animation: reel-spin 0.12s linear infinite;
-  }
+  .reel.spinning { animation: reel-spin 0.12s linear infinite; }
   @keyframes reel-spin {
     0% { transform: translateY(0); }
     100% { transform: translateY(-110px); }
   }
-
   .reel.blur-spinning .cell img,
   .reel.blur-spinning .cell .emoji-sym {
-    filter: blur(3px);
-    opacity: 0.7;
+    filter: blur(3px); opacity: 0.7;
   }
-
-  /* win cell glow */
   .cell.win-cell {
     background: rgba(57, 255, 20, 0.15);
     animation: cell-glow 0.5s infinite alternate;
   }
   .cell.win-cell img { border-color: var(--neon-green); box-shadow: 0 0 12px var(--neon-green); }
-  @keyframes cell-glow { from { background: rgba(57,255,20,0.1); } to { background: rgba(57,255,20,0.3); } }
-
-  /* payline overlay */
+  @keyframes cell-glow {
+    from { background: rgba(57,255,20,0.1); }
+    to { background: rgba(57,255,20,0.3); }
+  }
+  body.freespin-mode .cell.win-cell {
+    background: rgba(255,0,64,0.15);
+    animation: cell-glow-red 0.5s infinite alternate;
+  }
+  body.freespin-mode .cell.win-cell img { border-color: var(--neon-red); box-shadow: 0 0 12px var(--neon-red); }
+  @keyframes cell-glow-red {
+    from { background: rgba(255,0,64,0.1); }
+    to { background: rgba(255,0,64,0.3); }
+  }
   .payline-svg {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 10;
+    position: absolute; inset: 0; pointer-events: none; z-index: 10;
     width: 100%; height: 100%;
   }
 
   /* ── WIN DISPLAY ── */
-  #win-display {
-    text-align: center;
-    min-height: 36px;
-    margin-bottom: 10px;
-  }
-
+  #win-display { text-align: center; min-height: 36px; margin-bottom: 10px; }
   .win-text {
     font-family: 'Creepster', cursive;
     font-size: clamp(18px, 4vw, 30px);
@@ -258,27 +293,24 @@
     text-shadow: 0 0 15px var(--neon-green);
     animation: win-pop 0.4s ease-out;
   }
+  .win-text.freespin-win { color: #ff6666; text-shadow: 0 0 15px #ff0040; }
   .jackpot-text {
-    color: gold;
-    text-shadow: 0 0 20px gold, 0 0 40px orange;
+    color: gold; text-shadow: 0 0 20px gold, 0 0 40px orange;
     font-size: clamp(24px, 5vw, 40px);
     animation: jackpot-anim 0.3s ease-out;
+    font-family: 'Creepster', cursive;
   }
   @keyframes win-pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   @keyframes jackpot-anim { 0% { transform: scale(0.3) rotate(-10deg); opacity: 0; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
 
-  /* ── SPIN BUTTON ── */
+  /* ── CONTROLS ── */
   .controls { display: flex; justify-content: center; gap: 12px; align-items: center; }
-
   #spin-btn {
     background: linear-gradient(135deg, #cc0033, #ff0040);
-    border: none;
-    border-radius: 50px;
-    color: #fff;
+    border: none; border-radius: 50px; color: #fff;
     font-family: 'Creepster', cursive;
     font-size: clamp(22px, 4vw, 32px);
-    letter-spacing: 3px;
-    padding: 14px 48px;
+    letter-spacing: 3px; padding: 14px 48px;
     cursor: pointer;
     box-shadow: 0 0 20px #ff004080, 0 4px 15px rgba(0,0,0,0.5);
     animation: spin-btn-pulse 2s infinite;
@@ -287,58 +319,106 @@
   #spin-btn:hover { transform: scale(1.05); box-shadow: 0 0 35px #ff004099; }
   #spin-btn:active { transform: scale(0.97); }
   #spin-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; transform: none; }
-
   @keyframes spin-btn-pulse {
     0%,100% { box-shadow: 0 0 20px #ff004080; }
     50% { box-shadow: 0 0 40px #ff0040cc, 0 0 60px #ff004055; }
   }
-
   #paytable-btn {
-    background: rgba(191,0,255,0.2);
-    border: 1px solid var(--neon-purple);
-    color: var(--neon-purple);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 16px; font-weight: 700;
-    padding: 10px 18px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
+    background: rgba(191,0,255,0.2); border: 1px solid var(--neon-purple);
+    color: var(--neon-purple); font-family: 'Rajdhani', sans-serif;
+    font-size: 16px; font-weight: 700; padding: 10px 18px;
+    border-radius: 10px; cursor: pointer; transition: all 0.2s;
   }
   #paytable-btn:hover { background: var(--neon-purple); color: #fff; box-shadow: 0 0 12px var(--neon-purple); }
+  #highscores-btn {
+    background: rgba(57,255,20,0.12); border: 1px solid var(--neon-green);
+    color: var(--neon-green); font-family: 'Rajdhani', sans-serif;
+    font-size: 15px; font-weight: 700; padding: 10px 14px;
+    border-radius: 10px; cursor: pointer; transition: all 0.2s;
+  }
+  #highscores-btn:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 12px var(--neon-green); }
+
+  /* ── AUTOPLAY ── */
+  #autoplay-controls {
+    display: flex; gap: 6px; justify-content: center;
+    align-items: center; flex-wrap: wrap;
+    margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid #1a1a2e;
+  }
+  .ap-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+  .ap-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #333; color: #666;
+    border-radius: 8px; padding: 5px 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .ap-btn:hover { border-color: var(--neon-green); color: var(--neon-green); }
+  .ap-btn.active {
+    background: rgba(57,255,20,0.15);
+    border-color: var(--neon-green); color: var(--neon-green);
+    box-shadow: 0 0 8px #39ff1440;
+  }
+  #ap-stop-btn {
+    display: none;
+    background: rgba(255,0,64,0.2); border: 1px solid var(--neon-red);
+    color: var(--neon-red); border-radius: 8px; padding: 5px 14px;
+    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  #ap-stop-btn:hover { background: var(--neon-red); color: #fff; }
+  #ap-count-display {
+    display: none; font-size: 13px; color: var(--neon-green);
+    font-family: 'Rajdhani', sans-serif; white-space: nowrap;
+  }
+
+  /* ── RAMPAGE OVERLAY ── */
+  #rampage-overlay {
+    display: none; position: fixed; inset: 0; z-index: 80;
+    background: rgba(160, 0, 0, 0.75);
+    align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .rampage-text {
+    font-family: 'Creepster', cursive;
+    font-size: clamp(32px, 8vw, 72px); color: #fff;
+    text-shadow: 0 0 20px #ff0040, 0 0 60px #ff004099;
+    text-align: center; letter-spacing: 4px;
+    animation: rampage-scale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes rampage-scale {
+    from { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .rampage-reel {
+    border: 2px solid var(--neon-red) !important;
+    animation: rampage-reel-glow 0.3s infinite alternate !important;
+  }
+  @keyframes rampage-reel-glow {
+    from { box-shadow: 0 0 15px var(--neon-red); }
+    to   { box-shadow: 0 0 40px var(--neon-red), inset 0 0 30px #ff004055; }
+  }
 
   /* ── ZOMBIE CARDS ── */
   .zombie-cards {
-    display: flex; gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 18px;
+    display: flex; gap: 12px; justify-content: center;
+    flex-wrap: wrap; margin-top: 18px;
   }
-
   .zombie-card {
-    background: rgba(8, 8, 18, 0.55);
-    backdrop-filter: blur(6px);
+    background: rgba(8,8,18,0.55); backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    border: 1px solid #444;
-    border-radius: 14px;
-    padding: 10px;
-    text-align: center;
-    width: 110px;
+    border: 1px solid #444; border-radius: 14px;
+    padding: 10px; text-align: center; width: 110px;
     transition: transform 0.2s, border-color 0.2s;
   }
   .zombie-card:hover { transform: translateY(-4px); border-color: var(--neon-purple); box-shadow: 0 0 12px var(--neon-purple); }
-
   .zombie-card img {
-    width: 80px; height: 80px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid var(--neon-green);
+    width: 80px; height: 80px; object-fit: cover;
+    border-radius: 50%; border: 2px solid var(--neon-green);
     display: block; margin: 0 auto 6px;
   }
-  .zombie-card .zname {
-    font-size: 13px; font-weight: 700;
-    color: var(--neon-green);
-    text-shadow: 0 0 6px var(--neon-green);
-  }
+  .zombie-card .zname { font-size: 13px; font-weight: 700; color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green); }
   .zombie-card .ztitle { font-size: 11px; color: #888; margin-top: 2px; }
 
   /* ── MODALS ── */
@@ -348,37 +428,27 @@
     align-items: center; justify-content: center;
   }
   .modal-overlay.show { display: flex; }
-
   .modal {
     background: linear-gradient(135deg, #0d0d1a, #1a0d2e);
     border: 2px solid var(--neon-green);
-    border-radius: 20px;
-    padding: 30px;
-    max-width: 480px;
-    width: 90%;
+    border-radius: 20px; padding: 30px;
+    max-width: 480px; width: 90%;
     box-shadow: 0 0 40px var(--neon-green);
-    text-align: center;
-    animation: modal-in 0.4s ease-out;
+    text-align: center; animation: modal-in 0.4s ease-out;
   }
   @keyframes modal-in { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
   .modal h2 {
-    font-family: 'Creepster', cursive;
-    font-size: 28px;
-    color: var(--neon-green);
-    text-shadow: 0 0 15px var(--neon-green);
+    font-family: 'Creepster', cursive; font-size: 28px;
+    color: var(--neon-green); text-shadow: 0 0 15px var(--neon-green);
     margin-bottom: 16px;
   }
   .modal p { font-size: 15px; line-height: 1.6; color: #ccc; margin-bottom: 20px; }
-
   .modal-btn {
     background: linear-gradient(135deg, #cc0033, #ff0040);
-    border: none; border-radius: 30px;
-    color: #fff; font-family: 'Creepster', cursive;
-    font-size: 22px; letter-spacing: 2px;
-    padding: 12px 36px;
-    cursor: pointer;
-    box-shadow: 0 0 20px #ff004080;
+    border: none; border-radius: 30px; color: #fff;
+    font-family: 'Creepster', cursive; font-size: 22px;
+    letter-spacing: 2px; padding: 12px 36px;
+    cursor: pointer; box-shadow: 0 0 20px #ff004080;
     transition: transform 0.1s;
   }
   .modal-btn:hover { transform: scale(1.05); }
@@ -387,8 +457,7 @@
   .paytable { text-align: left; }
   .pt-row {
     display: flex; align-items: center; gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #222;
+    padding: 8px 0; border-bottom: 1px solid #222;
   }
   .pt-sym { font-size: 28px; width: 40px; text-align: center; }
   .pt-sym img { width: 36px; height: 36px; object-fit: cover; border-radius: 6px; }
@@ -398,10 +467,9 @@
   .pt-close {
     background: rgba(191,0,255,0.2); border: 1px solid var(--neon-purple);
     color: var(--neon-purple); font-family: 'Rajdhani', sans-serif;
-    font-size: 16px; font-weight: 700;
-    padding: 10px 24px; border-radius: 10px;
-    cursor: pointer; margin-top: 16px; transition: all 0.2s;
-    display: block; width: 100%;
+    font-size: 16px; font-weight: 700; padding: 10px 24px;
+    border-radius: 10px; cursor: pointer; margin-top: 16px;
+    transition: all 0.2s; display: block; width: 100%;
   }
   .pt-close:hover { background: var(--neon-purple); color: #fff; }
 
@@ -409,31 +477,19 @@
   #win-celebration {
     display: none; position: fixed; inset: 0; z-index: 60;
     background: rgba(0,0,0,0.82);
-    align-items: center; justify-content: center;
-    cursor: pointer;
+    align-items: center; justify-content: center; cursor: pointer;
   }
   #win-celebration.show { display: flex; animation: cel-bg-in 0.25s ease-out; }
   @keyframes cel-bg-in { from { opacity:0; } to { opacity:1; } }
-
-  .win-cel-card {
-    text-align: center;
-    animation: cel-bounce 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    padding: 30px 24px;
-  }
+  .win-cel-card { text-align: center; animation: cel-bounce 0.55s cubic-bezier(0.175,0.885,0.32,1.275); padding: 30px 24px; }
   @keyframes cel-bounce {
     0%   { transform: scale(0.15) rotate(-10deg); opacity:0; }
     70%  { transform: scale(1.08) rotate(2deg); }
     100% { transform: scale(1) rotate(0); opacity:1; }
   }
-
-  .win-cel-imgs {
-    display: flex; gap: 14px;
-    justify-content: center; margin-bottom: 18px;
-  }
-
+  .win-cel-imgs { display: flex; gap: 14px; justify-content: center; margin-bottom: 18px; }
   .win-cel-img {
-    width: 180px; height: 180px;
-    object-fit: cover; border-radius: 50%;
+    width: 180px; height: 180px; object-fit: cover; border-radius: 50%;
     border: 4px solid var(--neon-green);
     box-shadow: 0 0 25px var(--neon-green), 0 0 60px #39ff1455;
     animation: cel-img-pulse 0.5s infinite alternate;
@@ -443,61 +499,43 @@
     box-shadow: 0 0 40px var(--neon-green), 0 0 90px var(--neon-green);
     animation: cel-wild-pulse 0.35s infinite alternate;
   }
-  .win-cel-img.jackpot {
-    width: 115px; height: 115px;
-    border-color: gold;
-    box-shadow: 0 0 25px gold, 0 0 55px orange;
-    animation: cel-jackpot-pulse 0.4s infinite alternate;
-  }
+  .win-cel-img.jackpot { width: 115px; height: 115px; border-color: gold; box-shadow: 0 0 25px gold, 0 0 55px orange; animation: cel-jackpot-pulse 0.4s infinite alternate; }
+  .win-cel-img.freespin { border-color: #ff4444; box-shadow: 0 0 25px #ff0040, 0 0 55px #ff004055; }
   @keyframes cel-img-pulse {
-    from { transform: scale(1);    box-shadow: 0 0 20px var(--neon-green); }
+    from { transform: scale(1); box-shadow: 0 0 20px var(--neon-green); }
     to   { transform: scale(1.06); box-shadow: 0 0 45px var(--neon-green), 0 0 80px #39ff1444; }
   }
   @keyframes cel-wild-pulse {
-    from { transform: scale(1);    box-shadow: 0 0 30px var(--neon-green); }
-    to   { transform: scale(1.1);  box-shadow: 0 0 70px var(--neon-green), 0 0 120px #39ff1466; }
+    from { transform: scale(1); box-shadow: 0 0 30px var(--neon-green); }
+    to   { transform: scale(1.1); box-shadow: 0 0 70px var(--neon-green), 0 0 120px #39ff1466; }
   }
   @keyframes cel-jackpot-pulse {
-    from { transform: scale(1);    box-shadow: 0 0 20px gold; }
+    from { transform: scale(1); box-shadow: 0 0 20px gold; }
     to   { transform: scale(1.08); box-shadow: 0 0 50px gold, 0 0 90px orange; }
   }
-
-  .win-cel-emoji {
-    font-size: 120px; display: block;
-    margin-bottom: 18px;
-    animation: cel-emoji-pulse 0.45s infinite alternate;
-  }
+  .win-cel-emoji { font-size: 120px; display: block; margin-bottom: 18px; animation: cel-emoji-pulse 0.45s infinite alternate; }
   @keyframes cel-emoji-pulse {
-    from { transform: scale(1)    rotate(-3deg); filter: drop-shadow(0 0 12px var(--neon-green)); }
-    to   { transform: scale(1.12) rotate(3deg);  filter: drop-shadow(0 0 35px var(--neon-green)); }
+    from { transform: scale(1) rotate(-3deg); filter: drop-shadow(0 0 12px var(--neon-green)); }
+    to   { transform: scale(1.12) rotate(3deg); filter: drop-shadow(0 0 35px var(--neon-green)); }
   }
-
   .win-cel-amount {
-    font-family: 'Creepster', cursive;
-    font-size: clamp(38px, 9vw, 64px);
+    font-family: 'Creepster', cursive; font-size: clamp(38px, 9vw, 64px);
     color: var(--neon-green);
     text-shadow: 0 0 20px var(--neon-green), 0 0 45px var(--neon-green);
-    animation: cel-amount-in 0.4s ease-out 0.25s both;
-    display: block;
+    animation: cel-amount-in 0.4s ease-out 0.25s both; display: block;
   }
   .win-cel-amount.jackpot { color: gold; text-shadow: 0 0 20px gold, 0 0 50px orange; }
+  .win-cel-amount.freespin { color: #ff6666; text-shadow: 0 0 20px #ff0040, 0 0 50px #ff004066; }
   @keyframes cel-amount-in {
     from { transform: translateY(24px) scale(0.7); opacity:0; }
-    to   { transform: translateY(0) scale(1);      opacity:1; }
+    to   { transform: translateY(0) scale(1); opacity:1; }
   }
-
   .win-cel-label {
-    font-family: 'Creepster', cursive;
-    font-size: clamp(16px, 3.5vw, 24px);
+    font-family: 'Creepster', cursive; font-size: clamp(16px, 3.5vw, 24px);
     color: #bbb; margin-top: 6px;
-    animation: cel-amount-in 0.4s ease-out 0.45s both;
-    display: block;
+    animation: cel-amount-in 0.4s ease-out 0.45s both; display: block;
   }
-  .win-cel-tap {
-    font-size: 12px; color: #555; margin-top: 14px;
-    animation: tap-blink 1.2s infinite;
-    display: block;
-  }
+  .win-cel-tap { font-size: 12px; color: #555; margin-top: 14px; animation: tap-blink 1.2s infinite; display: block; }
   @keyframes tap-blink { 0%,100%{opacity:0.4} 50%{opacity:0.9} }
 
   /* ── PLAYER / HIGHSCORES ── */
@@ -513,16 +551,8 @@
   }
   .name-input:focus { box-shadow: 0 0 16px var(--neon-green); }
   .name-input::placeholder { color: #444; }
-
-  .welcome-returning {
-    display: none; font-size: 13px;
-    color: var(--neon-green); margin-bottom: 10px;
-    text-shadow: 0 0 6px var(--neon-green);
-  }
-
-  .hs-tabs {
-    display: flex; gap: 6px; margin-bottom: 14px;
-  }
+  .welcome-returning { display: none; font-size: 13px; color: var(--neon-green); margin-bottom: 10px; text-shadow: 0 0 6px var(--neon-green); }
+  .hs-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
   .hs-tab {
     flex: 1; padding: 7px 4px;
     background: rgba(255,255,255,0.05);
@@ -532,16 +562,8 @@
     transition: all 0.2s; text-align: center;
   }
   .hs-tab:hover { border-color: var(--neon-green); color: var(--neon-green); }
-  .hs-tab.active {
-    background: rgba(57,255,20,0.15);
-    border-color: var(--neon-green); color: var(--neon-green);
-    box-shadow: 0 0 10px #39ff1433;
-  }
-
-  .hs-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 0; border-bottom: 1px solid #1a1a2e;
-  }
+  .hs-tab.active { background: rgba(57,255,20,0.15); border-color: var(--neon-green); color: var(--neon-green); box-shadow: 0 0 10px #39ff1433; }
+  .hs-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #1a1a2e; }
   .hs-rank { font-size: 18px; width: 30px; text-align: center; }
   .hs-name { flex: 1; font-size: 15px; font-weight: 700; color: #ddd; }
   .hs-balance { font-size: 15px; color: var(--neon-green); font-weight: 700; white-space: nowrap; }
@@ -549,67 +571,60 @@
   .hs-row.me .hs-name { color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green); }
   #highscores-content { max-height: 55vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--neon-green) #111; }
 
-  #highscores-btn {
-    background: rgba(57,255,20,0.12);
-    border: 1px solid var(--neon-green);
-    color: var(--neon-green);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px; font-weight: 700;
-    padding: 10px 14px; border-radius: 10px;
-    cursor: pointer; transition: all 0.2s;
+  /* ── CHAT ── */
+  #chat-panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid #2a2a3a;
+    border-radius: 14px; overflow: hidden;
+    margin-top: 14px;
   }
-  #highscores-btn:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 12px var(--neon-green); }
-
-  /* ── STORY TICKER ── */
-  #story-ticker {
-    display: none;
-    text-align: center;
-    padding: 8px 16px;
-    margin-bottom: 8px;
-    font-family: 'Creepster', cursive;
-    font-size: clamp(13px, 2.5vw, 17px);
-    color: #cc88ff;
-    text-shadow: 0 0 8px #bf00ff;
-    background: rgba(50, 0, 80, 0.5);
-    border: 1px solid #bf00ff55;
-    border-radius: 8px;
-    animation: story-in 0.6s ease-out;
-    min-height: 38px;
+  #chat-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; cursor: pointer;
+    border-bottom: 1px solid #1a1a2e; user-select: none;
+    transition: background 0.2s;
   }
-  @keyframes story-in {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
+  #chat-header:hover { background: rgba(57,255,20,0.04); }
+  .chat-title {
+    font-family: 'Creepster', cursive; font-size: 18px;
+    color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green);
   }
-
-  /* ── RAMPAGE OVERLAY ── */
-  #rampage-overlay {
-    display: none;
-    position: fixed; inset: 0; z-index: 80;
-    background: rgba(160, 0, 0, 0.75);
-    align-items: center; justify-content: center;
-    pointer-events: none;
+  .chat-toggle-icon { color: #555; font-size: 13px; transition: transform 0.3s; }
+  #chat-body { display: none; }
+  #chat-body.open { display: block; }
+  #chat-messages {
+    height: 200px; overflow-y: auto; padding: 10px 14px;
+    scrollbar-width: thin; scrollbar-color: var(--neon-green) #111;
   }
-  .rampage-text {
-    font-family: 'Creepster', cursive;
-    font-size: clamp(32px, 8vw, 72px);
-    color: #fff;
-    text-shadow: 0 0 20px #ff0040, 0 0 60px #ff004099;
-    text-align: center;
-    letter-spacing: 4px;
-    animation: rampage-scale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  .chat-msg { margin-bottom: 7px; font-size: 14px; line-height: 1.4; }
+  .chat-msg-name { font-weight: 700; color: var(--neon-green); text-shadow: 0 0 4px var(--neon-green); margin-right: 5px; }
+  .chat-msg-name.me { color: var(--neon-purple); text-shadow: 0 0 4px var(--neon-purple); }
+  .chat-msg-text { color: #ccc; }
+  .chat-msg-time { font-size: 11px; color: #444; margin-left: 5px; }
+  .chat-sys { color: #444; font-size: 12px; font-style: italic; text-align: center; padding: 8px 0; }
+  #chat-input-row {
+    display: flex; gap: 8px; padding: 10px 14px;
+    border-top: 1px solid #1a1a2e;
   }
-  @keyframes rampage-scale {
-    from { transform: scale(0.3) rotate(-5deg); opacity: 0; }
-    to   { transform: scale(1) rotate(0); opacity: 1; }
+  #chat-input {
+    flex: 1; background: rgba(57,255,20,0.05);
+    border: 1px solid #2a2a3a; border-radius: 8px;
+    color: #fff; font-family: 'Rajdhani', sans-serif;
+    font-size: 15px; padding: 7px 12px; outline: none;
+    transition: border-color 0.2s;
   }
-  .rampage-reel {
-    border: 2px solid var(--neon-red) !important;
-    animation: rampage-reel-glow 0.3s infinite alternate !important;
+  #chat-input:focus { border-color: var(--neon-green); }
+  #chat-input::placeholder { color: #333; }
+  #chat-send-btn {
+    background: rgba(57,255,20,0.12); border: 1px solid var(--neon-green);
+    color: var(--neon-green); border-radius: 8px; padding: 7px 16px;
+    font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
   }
-  @keyframes rampage-reel-glow {
-    from { box-shadow: 0 0 15px var(--neon-red); }
-    to   { box-shadow: 0 0 40px var(--neon-red), inset 0 0 30px #ff004055; }
-  }
+  #chat-send-btn:hover { background: var(--neon-green); color: #000; }
+  #chat-send-btn:disabled { opacity: 0.4; cursor: default; }
 
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
@@ -658,15 +673,27 @@
     </div>
   </div>
 
-  <!-- Freespins Banner -->
-  <div id="freespins-banner">🎰 FREISPIELE: <span id="fs-count">0</span> verbleibend · 🔥 ×2 FLUCH-GEWINN! 🎰</div>
-  <!-- Story Ticker (während Freispiele) -->
+  <!-- Freespins Banner (Horror-Rot) -->
+  <div id="freespins-banner">☠️ FREISPIELE: <span id="fs-count">0</span> verbleibend · 🔥 ×2 FLUCH-GEWINN ☠️</div>
+
+  <!-- Story Ticker -->
   <div id="story-ticker"></div>
+
+  <!-- Fluch-Meter -->
+  <div id="fluch-meter-wrap">
+    <div class="fluch-header">
+      <span>☠️ FLUCH-METER</span>
+      <span id="fluch-level-text">0 / 3 Wins</span>
+    </div>
+    <div class="fluch-bar-bg">
+      <div class="fluch-bar" id="fluch-bar"></div>
+    </div>
+    <div id="fluch-active-text">⚡ SUPER-FLUCH AKTIV! NÄCHSTER SPIN ×6! ⚡</div>
+  </div>
 
   <!-- Machine -->
   <div class="machine">
     <div class="reels-container" id="reels-container">
-      <!-- Reels injected by JS -->
       <svg class="payline-svg" id="payline-svg"></svg>
     </div>
 
@@ -676,6 +703,18 @@
       <button id="paytable-btn">📋 Paytable</button>
       <button id="spin-btn">SPIN</button>
       <button id="highscores-btn">🏆 Scores</button>
+    </div>
+
+    <!-- Autoplay -->
+    <div id="autoplay-controls">
+      <span class="ap-label">Auto:</span>
+      <button class="ap-btn" data-ap="10">×10</button>
+      <button class="ap-btn" data-ap="20">×20</button>
+      <button class="ap-btn" data-ap="50">×50</button>
+      <button class="ap-btn" data-ap="100">×100</button>
+      <button class="ap-btn" data-ap="1000">×1000</button>
+      <span id="ap-count-display"></span>
+      <button id="ap-stop-btn">⏹ STOP</button>
     </div>
   </div>
 
@@ -700,6 +739,23 @@
       <div class="ztitle">Zombie mit Brille</div>
     </div>
   </div>
+
+  <!-- Chat -->
+  <div id="chat-panel">
+    <div id="chat-header">
+      <span class="chat-title">💬 Grüselhaus Chat</span>
+      <span class="chat-toggle-icon" id="chat-toggle-icon">▼</span>
+    </div>
+    <div id="chat-body">
+      <div id="chat-messages">
+        <p class="chat-sys">Verbinde mit dem Grüselhaus...</p>
+      </div>
+      <div id="chat-input-row">
+        <input id="chat-input" type="text" maxlength="200" placeholder="Schreib ins Grüselhaus..." autocomplete="off">
+        <button id="chat-send-btn" disabled>SENDEN 💀</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Welcome Modal -->
@@ -716,7 +772,9 @@
 
 <!-- Zombie Rampage Overlay -->
 <div id="rampage-overlay">
-  <div class="rampage-text">⚡ ZOMBIE RAMPAGE! ⚡<br><span style="font-size:0.5em;color:#ffaaaa">Eine Walze dreht durch!</span></div>
+  <div class="rampage-text">⚡ ZOMBIE RAMPAGE! ⚡<br>
+    <span style="font-size:0.5em;color:#ffaaaa">Eine Walze dreht komplett durch!</span>
+  </div>
 </div>
 
 <!-- Win Celebration Overlay -->
@@ -753,8 +811,22 @@
 </div>
 
 <script>
+/*
+  SUPABASE SETUP — Chat-Tabelle einmalig erstellen:
+  ─────────────────────────────────────────────────
+  create table chat_messages (
+    id          bigserial primary key,
+    player_name text not null,
+    message     text not null,
+    created_at  timestamptz default now()
+  );
+  alter table chat_messages enable row level security;
+  create policy "Alle lesen"     on chat_messages for select using (true);
+  create policy "Alle schreiben" on chat_messages for insert with check (true);
+*/
+
 // ============================================================
-// SYMBOLS
+// SYMBOLS  (RTP ~95% — skull weight 7)
 // ============================================================
 const SYMBOLS = [
   { id: 'cristiano', label: 'Cristiano', type: 'img',   src: 'images/cristiano.jpg', weight: 6 },
@@ -762,23 +834,21 @@ const SYMBOLS = [
   { id: 'benno',     label: 'Benno',     type: 'img',   src: 'images/benno.jpg',     weight: 6 },
   { id: 'haus',      label: 'Haus',      type: 'img',   src: 'images/haus.jpg',      weight: 4 },
   { id: 'joint',     label: 'Joint/CBD', type: 'img',   src: 'images/joint.jpg',     weight: 3, wild: true },
-  { id: 'bier',      label: 'Bier',      type: 'img',   src: 'images/bier.jpg',      weight: 8 },
+  { id: 'bier',      label: 'Bier',      type: 'img',   src: 'images/bier.jpg',      weight: 9 },
   { id: 'slot',      label: 'Slot',      type: 'img',   src: 'images/slot.jpg',      weight: 2, scatter: true },
-  { id: 'skull',     label: 'Totenkopf', type: 'emoji', emoji: '💀',                weight: 11 },
+  { id: 'skull',     label: 'Totenkopf', type: 'emoji', emoji: '💀',                weight: 7 },
 ];
 
 const REELS = 5;
 const ROWS  = 3;
 
-// Weighted random pool
 const POOL = [];
 SYMBOLS.forEach(s => { for (let i = 0; i < s.weight; i++) POOL.push(s.id); });
-
 function randSym() { return POOL[Math.floor(Math.random() * POOL.length)]; }
 function getSymbol(id) { return SYMBOLS.find(s => s.id === id); }
 
 // ============================================================
-// PAYLINES  (row indices per reel, 0=top, 1=mid, 2=bot)
+// PAYLINES
 // ============================================================
 const PAYLINES = [
   [1,1,1,1,1],  // 0 middle
@@ -793,22 +863,22 @@ const PAYLINES = [
 ];
 
 // ============================================================
-// MULTIPLIERS
+// MULTIPLIERS  (tuned for ~95% RTP)
 // ============================================================
 function calcWin(symbolId, count, bet) {
   if (count < 3) return 0;
   const base = {
-    cristiano: { 3: 10, 4: 30, 5: 100 },
-    senderos:  { 3: 10, 4: 30, 5: 100 },
-    benno:     { 3: 10, 4: 30, 5: 100 },
-    haus:      { 3: 20, 4: 60, 5: 100 },
-    joint:     { 3: 50, 4: 80, 5: 100 },
-    bier:      { 3: 5,  4: 15, 5: 100 },
-    slot:      { 3: 0,  4: 0,  5: 0   }, // scatter handled separately
+    cristiano: { 3: 12, 4: 35, 5: 120 },
+    senderos:  { 3: 12, 4: 35, 5: 120 },
+    benno:     { 3: 12, 4: 35, 5: 120 },
+    haus:      { 3: 25, 4: 70, 5: 200 },
+    joint:     { 3: 60, 4: 100, 5: 250 },
+    bier:      { 3: 8,  4: 22, 5: 80  },
+    slot:      { 3: 0,  4: 0,  5: 0   },
   };
   const t = base[symbolId];
-  const mult = t ? (t[count] || t[3] || 0) : 0;
-  return mult * bet;
+  if (!t) return 0;
+  return (t[count] || t[3] || 0) * bet;
 }
 
 // ============================================================
@@ -818,27 +888,38 @@ let balance    = 1000;
 let currentBet = 10;
 let freeSpins  = 0;
 let spinning   = false;
-let grid       = []; // grid[col][row]
+let grid       = [];
 
-// Special feature state
+// Freispin specials
 let freeSpinMultiplier = 1;
 let freeSpinStoryIdx   = 0;
-let rampageReel        = -1;
-let rampageActive      = false;
+
+// Fluch-Meter (fills during free spins)
+let fluchLevel  = 0;   // 0-3
+let fluchActive = false; // ×3 bonus spin
+
+// Zombie Rampage
+let rampageReel   = -1;
+let rampageActive = false;
+
+// Autoplay
+let autoSpinsRemain = 0;
+let autoPlaying     = false;
+let autoPlayTimer   = null;
 
 // ============================================================
-// FREISPIN STORY — Die Geschichte des Grüselhauses
+// FREISPIN STORY
 // ============================================================
 const FS_STORY = [
   "💀 Das Haus Steinleuten erwacht... Drei Männer verschwanden hier spurlos.",
   "🧟 Cristiano betrat als Erster die Schwelle. Sein Körper verschmolz mit der alten Technik des Kellers.",
-  "🧟 Senderos folgte. Er trug noch seinen Beanie, als der Fluch ihn ergriff. Er erinnert sich an nichts mehr.",
-  "🧟 Benno war der Letzte. Seine Brille blieb unversehrt — nur er selbst nicht.",
+  "🧟 Senderos folgte kurz darauf. Er trug noch seinen Beanie, als der Fluch ihn ergriff.",
+  "🧟 Benno war der Letzte. Er wollte die anderen retten. Seine Brille blieb unversehrt — nur er nicht.",
   "🏚️ Nun regieren sie das Grüselhaus zu dritt. Der Joint hält die Geister ruhig. Das Bier gärt seit '87.",
   "👁️ Die Wände beobachten dich. Das Haus wählt seine nächsten Bewohner sehr sorgfältig.",
   "🌿 Der Rauch liegt schwer in der Luft. Zeit verliert ihre Bedeutung hier drin.",
   "🍺 Das Bier im Keller hat eine eigene Stimme. Wer trinkt, bleibt für immer.",
-  "🏚️ Kein Ausgang mehr. Nur noch Walzen. Dreh weiter... das Haus braucht dich.",
+  "🏚️ Es gibt keinen Ausgang mehr. Nur noch Walzen. Dreh weiter... das Haus braucht dich.",
   "💀 Du bist jetzt Teil der Geschichte. Willkommen, neuer Bewohner des Grüselhauses Steinleuten.",
 ];
 
@@ -856,11 +937,7 @@ for (let c = 0; c < REELS; c++) {
   const reel = document.createElement('div');
   reel.className = 'reel';
   reel.id = `reel-${c}`;
-
-  // fill with random symbols (more than 3 for animation buffer)
-  for (let r = 0; r < 8; r++) {
-    reel.appendChild(makeCell(randSym()));
-  }
+  for (let r = 0; r < 8; r++) reel.appendChild(makeCell(randSym()));
 
   wrap.appendChild(reel);
   reelsContainer.insertBefore(wrap, document.getElementById('payline-svg'));
@@ -868,14 +945,13 @@ for (let c = 0; c < REELS; c++) {
 }
 
 function makeCell(symId) {
-  const sym = getSymbol(symId);
+  const sym  = getSymbol(symId);
   const cell = document.createElement('div');
   cell.className = 'cell';
   cell.dataset.sym = symId;
   if (sym.type === 'img') {
     const img = document.createElement('img');
-    img.src = sym.src;
-    img.alt = sym.label;
+    img.src = sym.src; img.alt = sym.label;
     img.onerror = () => {
       img.style.display = 'none';
       const span = document.createElement('span');
@@ -894,12 +970,12 @@ function makeCell(symId) {
 }
 
 // ============================================================
-// AUDIO (Web Audio API) — Gruselig Edition
+// AUDIO
 // ============================================================
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playTone(freq, type, duration, gainVal, delay = 0) {
-  const osc  = audioCtx.createOscillator();
+  const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.connect(gain); gain.connect(audioCtx.destination);
   osc.type = type; osc.frequency.value = freq;
@@ -908,14 +984,12 @@ function playTone(freq, type, duration, gainVal, delay = 0) {
   osc.start(audioCtx.currentTime + delay);
   osc.stop(audioCtx.currentTime + delay + duration + 0.01);
 }
-
-// Weißes Rauschen (Knacken / Crackle)
 function makeNoise(duration, gainVal, delay = 0) {
   const bufSize = Math.floor(audioCtx.sampleRate * duration);
-  const buf  = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+  const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-  const src  = audioCtx.createBufferSource();
+  const src = audioCtx.createBufferSource();
   src.buffer = buf;
   const gain = audioCtx.createGain();
   src.connect(gain); gain.connect(audioCtx.destination);
@@ -923,10 +997,8 @@ function makeNoise(duration, gainVal, delay = 0) {
   gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
   src.start(audioCtx.currentTime + delay);
 }
-
-// Frequenz-Sweep (für Scatter / Horror-Effekte)
 function makeSweep(freqFrom, freqTo, duration, gainVal, type = 'sine', delay = 0) {
-  const osc  = audioCtx.createOscillator();
+  const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.connect(gain); gain.connect(audioCtx.destination);
   osc.type = type;
@@ -938,35 +1010,33 @@ function makeSweep(freqFrom, freqTo, duration, gainVal, type = 'sine', delay = 0
   osc.stop(audioCtx.currentTime + delay + duration + 0.05);
 }
 
-// Spin: mechanisches Rumpeln + tiefes Stöhnen
 function soundSpin() {
   makeNoise(0.25, 0.12);
   playTone(38, 'sawtooth', 1.6, 0.07);
   playTone(42, 'sawtooth', 1.6, 0.05, 0.05);
   makeSweep(90, 55, 1.4, 0.04, 'sine', 0.1);
-  makeSweep(70, 50, 1.2, 0.03, 'sine', 0.3);
 }
-
-// Reel Stop: dumpfer Knall + Holzknarren
 function soundStop() {
   makeNoise(0.06, 0.2);
   playTone(55, 'sine', 0.18, 0.18);
   playTone(40, 'sine', 0.25, 0.12, 0.04);
   makeSweep(130, 65, 0.15, 0.06, 'sawtooth', 0.02);
 }
-
-// Gewinn: dissonanter Glocken-Horror
 function soundWin() {
-  // Tritonus — der "Teufelston"
   playTone(220, 'sine', 0.9, 0.12);
-  playTone(311, 'sine', 0.9, 0.09, 0.04);   // Tritonus
+  playTone(311, 'sine', 0.9, 0.09, 0.04);
   playTone(165, 'sine', 1.1, 0.07, 0.12);
   makeNoise(0.05, 0.08, 0.08);
-  playTone(440, 'sine', 0.5, 0.05, 0.4);
   makeSweep(500, 300, 0.4, 0.04, 'sine', 0.5);
 }
-
-// Jackpot: epischer Horror-Sting
+function soundFreespinWin() {
+  // Horror bells in red-mode
+  playTone(180, 'sine', 0.8, 0.14);
+  playTone(240, 'sine', 0.8, 0.10, 0.06);
+  makeSweep(400, 200, 0.5, 0.08, 'sawtooth', 0.1);
+  makeNoise(0.05, 0.06, 0.15);
+  playTone(120, 'sine', 1.0, 0.08, 0.3);
+}
 function soundJackpot() {
   makeNoise(0.12, 0.3);
   playTone(28, 'sawtooth', 2.5, 0.22);
@@ -976,55 +1046,46 @@ function soundJackpot() {
     playTone(f * 1.48, 'sine', 1.0, 0.07, 0.18 + i * 0.18);
   });
   makeNoise(0.08, 0.25, 0.05);
-  makeNoise(0.08, 0.18, 0.45);
-  makeNoise(0.08, 0.12, 0.9);
   makeSweep(60, 200, 1.5, 0.08, 'sine', 0.2);
 }
-
-// Scatter: übernatürlicher Geister-Sweep
 function soundScatter() {
   makeSweep(50, 900, 1.1, 0.14, 'sine');
   makeSweep(55, 700, 1.1, 0.08, 'sine', 0.05);
   makeNoise(0.12, 0.1, 0.15);
   playTone(220, 'sine', 0.6, 0.1, 0.6);
-  playTone(277, 'sine', 0.5, 0.07, 0.75);
   makeNoise(0.06, 0.08, 0.9);
 }
-
-// Zombie Rampage: brutaler Einschlag
 function soundRampage() {
   makeNoise(0.12, 0.4);
   playTone(40, 'sawtooth', 1.0, 0.3);
   makeSweep(150, 900, 0.4, 0.18, 'sawtooth', 0.04);
-  makeSweep(900, 150, 0.5, 0.12, 'sine', 0.3);
+  makeSweep(900, 150, 0.5, 0.1, 'sine', 0.3);
   playTone(80, 'sine', 0.7, 0.15, 0.15);
   makeNoise(0.08, 0.2, 0.2);
 }
-
-// Zufälliges Knarren / Knacken im Hintergrund
+function soundSuperFluch() {
+  makeNoise(0.08, 0.3);
+  makeSweep(80, 600, 0.6, 0.2, 'sawtooth');
+  playTone(55, 'sine', 1.2, 0.18, 0.1);
+  makeSweep(600, 80, 0.6, 0.12, 'sine', 0.5);
+}
 function soundCreak() {
   const r = Math.random();
   if (r < 0.4) {
-    // Holz knarrt
     makeSweep(120, 70 + Math.random() * 40, 0.3 + Math.random() * 0.3, 0.04, 'sawtooth');
   } else if (r < 0.7) {
-    // Knacken
     makeNoise(0.04 + Math.random() * 0.04, 0.05);
     if (Math.random() > 0.5) makeNoise(0.03, 0.03, 0.08);
   } else {
-    // Tiefes Stöhnen
     makeSweep(55, 45, 0.8 + Math.random() * 0.5, 0.03, 'sine');
   }
 }
-
-// Ambiente Hintergrundgeräusche starten
 function startAmbient() {
   const scheduleNext = () => {
-    const delay = 5000 + Math.random() * 10000; // alle 5–15 Sek
     setTimeout(() => {
       if (audioCtx.state === 'running') soundCreak();
       scheduleNext();
-    }, delay);
+    }, 5000 + Math.random() * 10000);
   };
   scheduleNext();
 }
@@ -1035,6 +1096,7 @@ function startAmbient() {
 function doSpin() {
   if (spinning) return;
   if (freeSpins <= 0 && balance < currentBet) {
+    if (autoPlaying) stopAutoplay();
     alert('Nicht genug CHZINU! Guthaben zu niedrig.');
     return;
   }
@@ -1044,14 +1106,16 @@ function doSpin() {
   document.getElementById('spin-btn').disabled = true;
   clearWinHighlights();
 
-  // Zombie Rampage: 5% Chance (auch während Freispiele)
+  // Zombie Rampage: 5% chance
   rampageActive = Math.random() < 0.05;
   rampageReel   = rampageActive ? Math.floor(Math.random() * REELS) : -1;
   if (rampageActive) triggerRampageEffect();
 
   if (freeSpins > 0) {
     freeSpins--;
-    freeSpinMultiplier = 2; // Fluch-Multiplikator ×2
+    // Fluch-Multiplikator: Super-Fluch = ×6, normal = ×2
+    freeSpinMultiplier = fluchActive ? 6 : 2;
+    if (fluchActive) { soundSuperFluch(); }
     showStoryChapter(freeSpinStoryIdx % FS_STORY.length);
     freeSpinStoryIdx++;
     updateFSBanner();
@@ -1059,6 +1123,7 @@ function doSpin() {
     freeSpinMultiplier = 1;
     hideStoryChapter();
     balance -= currentBet;
+    if (autoPlaying) autoSpinsRemain--;
     updateHUD();
     saveCurrentPlayer();
   }
@@ -1066,7 +1131,7 @@ function doSpin() {
   document.getElementById('win-display').innerHTML = '';
   soundSpin();
 
-  // Generate final grid — rampage reel → all wild
+  // Generate grid — rampage reel → all wild
   const newGrid = [];
   for (let c = 0; c < REELS; c++) {
     const col = [];
@@ -1076,7 +1141,6 @@ function doSpin() {
     newGrid.push(col);
   }
 
-  // Animate reels, stop one by one
   const stopDelay = 400;
   for (let c = 0; c < REELS; c++) {
     const reel = reelEls[c];
@@ -1084,9 +1148,7 @@ function doSpin() {
     if (rampageActive && c === rampageReel) {
       document.getElementById(`reel-wrap-${c}`).classList.add('rampage-reel');
     }
-    setTimeout(() => {
-      stopReel(c, newGrid[c]);
-    }, 800 + c * stopDelay);
+    setTimeout(() => stopReel(c, newGrid[c]), 800 + c * stopDelay);
   }
 
   setTimeout(() => {
@@ -1101,8 +1163,6 @@ function stopReel(colIdx, finalSyms) {
   const reel = reelEls[colIdx];
   reel.classList.remove('spinning', 'blur-spinning');
   soundStop();
-
-  // Rebuild reel cells with final symbols
   reel.innerHTML = '';
   finalSyms.forEach(id => reel.appendChild(makeCell(id)));
 }
@@ -1111,27 +1171,20 @@ function stopReel(colIdx, finalSyms) {
 // WIN EVALUATION
 // ============================================================
 function evaluateWin() {
-  let totalWin = 0;
+  let totalWin    = 0;
   let winningLines = [];
   let scatterCount = 0;
-  let isJackpot = false;
+  let isJackpot    = false;
 
-  // Count scatters across whole grid
-  for (let c = 0; c < REELS; c++) {
-    for (let r = 0; r < ROWS; r++) {
+  for (let c = 0; c < REELS; c++)
+    for (let r = 0; r < ROWS; r++)
       if (grid[c][r] === 'slot') scatterCount++;
-    }
-  }
 
-  // Check each payline
   PAYLINES.forEach((line, li) => {
-    const syms = line.map((row, col) => grid[col][row]);
-
-    // Find first real symbol (no wild, no skull — skull never wins)
+    const syms  = line.map((row, col) => grid[col][row]);
     const first = syms.find(s => s !== 'joint' && s !== 'skull') || null;
     if (!first) return;
 
-    // Count consecutive matches from left (wilds count, skulls break chain)
     let count = 0;
     for (let i = 0; i < syms.length; i++) {
       if (syms[i] === first || syms[i] === 'joint') count++;
@@ -1148,17 +1201,17 @@ function evaluateWin() {
     }
   });
 
-  // Apply Fluch-Multiplikator during free spins
+  // Apply Fluch-Multiplikator
   if (freeSpinMultiplier > 1 && totalWin > 0) {
     totalWin = Math.round(totalWin * freeSpinMultiplier);
   }
 
-  // Scatter → Freispiele (oder Retrigger)
+  // Scatter → Freispiele / Retrigger
   if (scatterCount >= 3) {
     const wasInFS  = freeSpins > 0;
     const newSpins = scatterCount >= 5 ? 10 : scatterCount >= 4 ? 7 : 5;
     freeSpins += newSpins;
-    freeSpinStoryIdx = 0; // Geschichte von vorne
+    freeSpinStoryIdx = 0;
     updateFSBanner();
     soundScatter();
     const msg = wasInFS
@@ -1167,15 +1220,16 @@ function evaluateWin() {
     showWinText(msg, false, true);
     setTimeout(() => {
       if (totalWin > 0) resolveWin(totalWin, winningLines, isJackpot);
+      else checkAutoplay();
     }, 1200);
     return;
   }
 
-  // Geisterhände: Bei Fast-Gewinn 15% Chance auf kleinen Bonus
+  // Geisterhände: Near-miss bonus (15% chance, 2 matching on any line)
   if (totalWin === 0 && !rampageActive) {
     let nearMiss = false;
     for (const line of PAYLINES) {
-      const syms = line.map((row, col) => grid[col][row]);
+      const syms  = line.map((row, col) => grid[col][row]);
       const first = syms.find(s => s !== 'joint' && s !== 'skull');
       if (!first) continue;
       let count = 0;
@@ -1191,6 +1245,7 @@ function evaluateWin() {
       updateHUD(nudgeWin);
       showWinText(`👻 GEISTERHÄNDE! +${nudgeWin} CHZINU`, false);
       saveCurrentPlayer();
+      checkAutoplay();
       return;
     }
   }
@@ -1199,41 +1254,70 @@ function evaluateWin() {
 }
 
 function resolveWin(totalWin, winningLines, isJackpot) {
+  const wasInFreeSpin = freeSpinMultiplier > 1;
+
   if (totalWin > 0) {
     balance += totalWin;
     updateHUD(totalWin);
     highlightWinningCells(winningLines);
+
+    // Fluch-Meter füllen / zurücksetzen
+    if (wasInFreeSpin) {
+      if (fluchActive) {
+        // Super-Spin wurde verwendet
+        fluchActive = false;
+        fluchLevel  = 0;
+      } else {
+        fluchLevel = Math.min(fluchLevel + 1, 3);
+        if (fluchLevel >= 3) {
+          fluchActive = true;
+        }
+      }
+      updateFluchMeter();
+    }
+
     const multTag = freeSpinMultiplier > 1 ? ` 🔥×${freeSpinMultiplier}` : '';
     if (isJackpot) {
       soundJackpot();
-      showWinText(`💥 JACKPOT! +${totalWin} CHZINU${multTag} 💥`, true);
+      showWinText(`💥 JACKPOT! +${totalWin} CHZINU${multTag} 💥`, true, false, wasInFreeSpin);
+    } else if (wasInFreeSpin) {
+      soundFreespinWin();
+      showWinText(`☠️ FLUCH-GEWINN! +${totalWin} CHZINU${multTag}`, false, false, true);
     } else {
       soundWin();
-      showWinText(`🏆 GEWINN! +${totalWin} CHZINU${multTag}`, false);
+      showWinText(`🏆 GEWINN! +${totalWin} CHZINU`, false);
     }
-    showWinCelebration(winningLines, totalWin, isJackpot);
+    showWinCelebration(winningLines, totalWin, isJackpot, wasInFreeSpin);
   } else {
     document.getElementById('last-win-display').textContent = '— CHZINU';
+    checkAutoplay();
+    return;
   }
+
   saveCurrentPlayer();
+  checkAutoplay();
 }
 
-function showWinCelebration(winningLines, totalWin, isJackpot) {
+function showWinText(text, jackpot, scatter, freespin) {
+  const cls = jackpot ? 'jackpot-text' : (freespin ? 'win-text freespin-win' : 'win-text');
+  document.getElementById('win-display').innerHTML = `<div class="${cls}">${text}</div>`;
+}
+
+function showWinCelebration(winningLines, totalWin, isJackpot, wasFreeSpin) {
   const overlay  = document.getElementById('win-celebration');
   const imgsEl   = document.getElementById('win-cel-imgs');
   const amountEl = document.getElementById('win-cel-amount');
   const labelEl  = document.getElementById('win-cel-label');
 
   imgsEl.innerHTML = '';
-
   const sym = winningLines[0] ? getSymbol(winningLines[0].symId) : null;
+  const imgClass = wasFreeSpin ? 'win-cel-img freespin' : 'win-cel-img';
 
   if (isJackpot) {
-    // Alle drei Zombies zeigen
     ['cristiano', 'senderos', 'benno'].forEach(id => {
       const s = getSymbol(id);
       const img = document.createElement('img');
-      img.src = s.src; img.className = 'win-cel-img jackpot';
+      img.src = s.src; img.className = imgClass + ' jackpot';
       imgsEl.appendChild(img);
     });
     amountEl.className = 'win-cel-amount jackpot';
@@ -1242,7 +1326,7 @@ function showWinCelebration(winningLines, totalWin, isJackpot) {
     if (sym.type === 'img') {
       const img = document.createElement('img');
       img.src = sym.src;
-      img.className = 'win-cel-img' + (sym.wild ? ' wild' : '');
+      img.className = imgClass + (sym.wild ? ' wild' : '');
       imgsEl.appendChild(img);
     } else {
       const span = document.createElement('span');
@@ -1250,13 +1334,16 @@ function showWinCelebration(winningLines, totalWin, isJackpot) {
       span.textContent = sym.emoji;
       imgsEl.appendChild(span);
     }
-    amountEl.className = 'win-cel-amount';
-    labelEl.textContent = sym.wild ? '🌿 WILD WINS! 🌿' : `🏆 ${sym.label.toUpperCase()}!`;
+    const multTag = freeSpinMultiplier > 1 ? ` ×${freeSpinMultiplier}` : '';
+    amountEl.className = wasFreeSpin ? 'win-cel-amount freespin' : 'win-cel-amount';
+    labelEl.textContent = sym.wild
+      ? `🌿 WILD WINS!${multTag}`
+      : `${wasFreeSpin ? '☠️' : '🏆'} ${sym.label.toUpperCase()}!${multTag}`;
   }
 
   amountEl.textContent = `+${totalWin} CHZINU`;
-
   overlay.classList.add('show');
+
   const dismiss = () => {
     overlay.classList.remove('show');
     overlay.removeEventListener('click', dismiss);
@@ -1265,28 +1352,13 @@ function showWinCelebration(winningLines, totalWin, isJackpot) {
   setTimeout(dismiss, isJackpot ? 4500 : 2800);
 }
 
-function showWinText(text, jackpot, scatter) {
-  const div = document.getElementById('win-display');
-  div.innerHTML = `<div class="${jackpot ? 'jackpot-text' : 'win-text'}">${text}</div>`;
-}
-
 function highlightWinningCells(winningLines) {
   if (!winningLines.length) return;
-
-  // Highlight reel wraps that are part of winning lines
-  const winCols = new Set();
   winningLines.forEach(wl => {
-    for (let c = 0; c < REELS; c++) winCols.add(c);
-  });
-  winCols.forEach(c => {
-    document.getElementById(`reel-wrap-${c}`).classList.add('win-highlight');
-  });
-
-  // Highlight individual cells
-  winningLines.forEach(wl => {
+    for (let c = 0; c < REELS; c++)
+      document.getElementById(`reel-wrap-${c}`).classList.add('win-highlight');
     wl.line.forEach((row, col) => {
-      const reel = reelEls[col];
-      const cells = reel.querySelectorAll('.cell');
+      const cells = reelEls[col].querySelectorAll('.cell');
       if (cells[row]) cells[row].classList.add('win-cell');
     });
   });
@@ -1295,33 +1367,72 @@ function highlightWinningCells(winningLines) {
 function clearWinHighlights() {
   for (let c = 0; c < REELS; c++) {
     const wrap = document.getElementById(`reel-wrap-${c}`);
-    if (wrap) { wrap.classList.remove('win-highlight'); wrap.classList.remove('rampage-reel'); }
-    const reel = reelEls[c];
-    reel.querySelectorAll('.cell').forEach(cell => cell.classList.remove('win-cell'));
+    if (wrap) {
+      wrap.classList.remove('win-highlight');
+      wrap.classList.remove('rampage-reel');
+    }
+    reelEls[c].querySelectorAll('.cell').forEach(cell => cell.classList.remove('win-cell'));
   }
   document.getElementById('payline-svg').innerHTML = '';
 }
 
 // ============================================================
-// HUD
+// AUTOPLAY
 // ============================================================
-function updateHUD(lastWin) {
-  document.getElementById('balance-display').textContent = `${balance} CHZINU`;
-  if (lastWin != null) {
-    document.getElementById('last-win-display').textContent = `+${lastWin} CHZINU`;
+function startAutoplay(count) {
+  autoSpinsRemain = count;
+  autoPlaying     = true;
+  document.getElementById('ap-stop-btn').style.display = 'inline-block';
+  document.getElementById('ap-count-display').style.display = 'inline';
+  updateAutoplayDisplay();
+  doSpin();
+}
+
+function stopAutoplay() {
+  autoPlaying     = false;
+  autoSpinsRemain = 0;
+  clearTimeout(autoPlayTimer);
+  document.getElementById('ap-stop-btn').style.display = 'none';
+  document.getElementById('ap-count-display').style.display = 'none';
+  document.querySelectorAll('.ap-btn').forEach(b => b.classList.remove('active'));
+}
+
+function updateAutoplayDisplay() {
+  document.getElementById('ap-count-display').textContent = `${autoSpinsRemain} verbleibend`;
+}
+
+function checkAutoplay() {
+  if (!autoPlaying) return;
+  if (freeSpins > 0) return; // free spins play out first, don't count against autoplay
+  if (autoSpinsRemain > 0 && balance >= currentBet) {
+    updateAutoplayDisplay();
+    autoPlayTimer = setTimeout(doSpin, 900);
+  } else {
+    stopAutoplay();
   }
 }
 
-function updateFSBanner() {
-  const banner = document.getElementById('freespins-banner');
-  if (freeSpins > 0) {
-    banner.style.display = 'block';
-    document.getElementById('fs-count').textContent = freeSpins;
-  } else {
-    banner.style.display = 'none';
-    hideStoryChapter();
-    freeSpinStoryIdx = 0;
-  }
+// ============================================================
+// FREESPIN MODE + FLUCH-METER
+// ============================================================
+function enterFreespinMode() {
+  document.body.classList.add('freespin-mode');
+  document.getElementById('fluch-meter-wrap').style.display = 'block';
+  fluchLevel  = 0;
+  fluchActive = false;
+  updateFluchMeter();
+}
+
+function exitFreespinMode() {
+  document.body.classList.remove('freespin-mode');
+  document.getElementById('fluch-meter-wrap').style.display = 'none';
+}
+
+function updateFluchMeter() {
+  const pct = (fluchLevel / 3) * 100;
+  document.getElementById('fluch-bar').style.width = pct + '%';
+  document.getElementById('fluch-level-text').textContent = `${fluchLevel} / 3 Wins`;
+  document.getElementById('fluch-active-text').style.display = fluchActive ? 'block' : 'none';
 }
 
 // ============================================================
@@ -1331,7 +1442,7 @@ function showStoryChapter(idx) {
   const ticker = document.getElementById('story-ticker');
   ticker.style.display = 'block';
   ticker.style.animation = 'none';
-  void ticker.offsetWidth; // reflow to restart animation
+  void ticker.offsetWidth;
   ticker.style.animation = '';
   ticker.textContent = FS_STORY[idx];
 }
@@ -1348,47 +1459,71 @@ function triggerRampageEffect() {
 }
 
 // ============================================================
+// HUD
+// ============================================================
+function updateHUD(lastWin) {
+  document.getElementById('balance-display').textContent = `${balance} CHZINU`;
+  if (lastWin != null)
+    document.getElementById('last-win-display').textContent = `+${lastWin} CHZINU`;
+}
+
+function updateFSBanner() {
+  const banner = document.getElementById('freespins-banner');
+  if (freeSpins > 0) {
+    banner.style.display = 'block';
+    document.getElementById('fs-count').textContent = freeSpins;
+    if (!document.body.classList.contains('freespin-mode')) enterFreespinMode();
+  } else {
+    banner.style.display = 'none';
+    hideStoryChapter();
+    freeSpinStoryIdx = 0;
+    exitFreespinMode();
+  }
+}
+
+// ============================================================
 // PAYTABLE
 // ============================================================
 function buildPaytable() {
   const rows = [
-    { sym: SYMBOLS[0], wins: '3x = 10× | 4x = 30× | 5x = 100×', note: 'Zombie-Cyborg' },
-    { sym: SYMBOLS[1], wins: '3x = 10× | 4x = 30× | 5x = 100×', note: 'Zombie mit Beanie' },
-    { sym: SYMBOLS[2], wins: '3x = 10× | 4x = 30× | 5x = 100×', note: 'Zombie mit Brille' },
-    { sym: SYMBOLS[3], wins: '3x = 20× | 4x = 60× | 5x = 100×', note: 'Haus Steinleuten' },
-    { sym: SYMBOLS[4], wins: '3x = 50× | 4x = 80× | 5x = 100×', note: '🌿 WILD — ersetzt alles' },
-    { sym: SYMBOLS[5], wins: '3x = 5× | 4x = 15× | 5x = 100×', note: 'Bier' },
-    { sym: SYMBOLS[6], wins: '3+ SCATTER = 5 Freispiele', note: '🎰 SCATTER / BONUS' },
+    { sym: SYMBOLS[0], wins: '3x = 12× | 4x = 35× | 5x = 120×', note: 'Zombie-Cyborg' },
+    { sym: SYMBOLS[1], wins: '3x = 12× | 4x = 35× | 5x = 120×', note: 'Zombie mit Beanie' },
+    { sym: SYMBOLS[2], wins: '3x = 12× | 4x = 35× | 5x = 120×', note: 'Zombie mit Brille' },
+    { sym: SYMBOLS[3], wins: '3x = 25× | 4x = 70× | 5x = 200×', note: 'Haus Steinleuten' },
+    { sym: SYMBOLS[4], wins: '3x = 60× | 4x = 100× | 5x = 250×', note: '🌿 WILD — ersetzt alles' },
+    { sym: SYMBOLS[5], wins: '3x = 8× | 4x = 22× | 5x = 80×', note: 'Bier' },
+    { sym: SYMBOLS[6], wins: '3+ SCATTER = 5/7/10 Freispiele', note: '🎰 SCATTER / BONUS' },
   ];
 
   let html = '';
   rows.forEach(r => {
     const symHtml = r.sym.type === 'img'
-      ? `<img src="${r.sym.src}" onerror="this.outerHTML='<span>${r.sym.emoji||'🧟'}</span>'">`
+      ? `<img src="${r.sym.src}" onerror="this.outerHTML='<span>🧟</span>'">`
       : `<span>${r.sym.emoji}</span>`;
     html += `<div class="pt-row">
       <div class="pt-sym">${symHtml}</div>
       <div class="pt-info">
-        <div class="pt-name">${r.sym.label} ${r.note ? '— '+r.note : ''}</div>
+        <div class="pt-name">${r.sym.label} — ${r.note}</div>
         <div class="pt-win">${r.wins}</div>
       </div>
     </div>`;
   });
 
-  html += `<div style="margin-top:12px;font-size:12px;color:#888;line-height:1.7">
-    Alle Gewinne = Anzahl × Einsatz-Multiplikator. 9 Gewinnlinien aktiv.<br>
-    🌿 WILD ersetzt alle außer SCATTER.<br>
-    🎰 SCATTER: 3=5 · 4=7 · 5=10 Freispiele (Retrigger möglich!)<br>
-    🔥 Freispiele: Alle Gewinne ×2 (Fluch-Multiplikator)<br>
-    ⚡ ZOMBIE RAMPAGE: 5% Chance — eine Walze dreht komplett wild!<br>
-    👻 GEISTERHÄNDE: Fast-Gewinn? Die Geister helfen manchmal nach.
+  html += `<div style="margin-top:12px;font-size:12px;color:#888;line-height:1.8">
+    Alle Gewinne = Anzahl × Einsatz-Multiplikator · 9 Gewinnlinien<br>
+    🎰 Scatter: 3=5 · 4=7 · 5=10 Freispiele (Retrigger möglich!)<br>
+    🔥 Freispiele: Alle Gewinne ×2 Fluch-Multiplikator<br>
+    ☠️ Fluch-Meter: 3 Wins → nächster Freispin ×6!<br>
+    ⚡ Zombie Rampage: 5% Chance — eine Walze wird komplett Wild<br>
+    👻 Geisterhände: Fast-Gewinn? Die Geister helfen manchmal nach.<br>
+    📊 RTP: ~95%
   </div>`;
 
   document.getElementById('paytable-content').innerHTML = html;
 }
 
 // ============================================================
-// SUPABASE — SPIELSTAND
+// SUPABASE
 // ============================================================
 const SB_URL = 'https://tnqaqfaawoewslxuigoy.supabase.co/rest/v1';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRucWFxZmFhd29ld3NseHVpZ295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NTU4OTQsImV4cCI6MjA5MDAzMTg5NH0.MHFESMciu3Q7k_5z-dvViLrp89gyoNcrOJ1egsphWEk';
@@ -1398,8 +1533,8 @@ const SB_HEADERS = {
   'Content-Type': 'application/json'
 };
 
-let currentPlayer    = null;
-let currentHighscore = 0;
+let currentPlayer        = null;
+let currentHighscore     = 0;
 let currentHighscoreDate = null;
 
 async function sbGet(query) {
@@ -1428,7 +1563,7 @@ async function saveCurrentPlayer() {
   if (!currentPlayer) return;
   const newHS = balance > currentHighscore;
   if (newHS) {
-    currentHighscore = balance;
+    currentHighscore     = balance;
     currentHighscoreDate = new Date().toISOString();
   }
   await sbUpsert({
@@ -1440,12 +1575,11 @@ async function saveCurrentPlayer() {
   });
 }
 
-async function buildHighscores(period = 'today') {
+async function buildHighscores(period = 'all') {
   document.getElementById('highscores-content').innerHTML =
     '<p style="color:#666;text-align:center;padding:20px">⏳ Lade...</p>';
 
   const rows = await sbGet('highscores?select=*&order=highscore.desc');
-
   const now        = Date.now();
   const todayStart = new Date(); todayStart.setHours(0,0,0,0);
   const weekStart  = now - 7 * 24 * 60 * 60 * 1000;
@@ -1459,7 +1593,7 @@ async function buildHighscores(period = 'today') {
 
   const emptyMsg = {
     today: 'Heute noch kein Highscore aufgestellt.',
-    week:  'Diese Woche noch kein Highscore aufgestellt.',
+    week:  'Diese Woche noch kein Highscore.',
     all:   'Noch keine Spieler.'
   };
 
@@ -1476,7 +1610,7 @@ async function buildHighscores(period = 'today') {
     const isMe = d.name === currentPlayer;
     html += `<div class="hs-row${isMe ? ' me' : ''}">
       <span class="hs-rank">${medals[i] || (i+1)+'.'}</span>
-      <span class="hs-name">${d.name}${isMe ? ' 👈' : ''}</span>
+      <span class="hs-name">${escHtml(d.name)}${isMe ? ' 👈' : ''}</span>
       <span class="hs-balance">${d.highscore}</span>
       <span class="hs-date">${fmt(d.highscore_date)}</span>
     </div>`;
@@ -1485,10 +1619,59 @@ async function buildHighscores(period = 'today') {
 }
 
 // ============================================================
+// CHAT
+// ============================================================
+let chatPollTimer = null;
+let chatOpen      = false;
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function loadChat() {
+  const rows = await sbGet('chat_messages?select=*&order=created_at.asc&limit=60');
+  if (!Array.isArray(rows) || !rows.length) return;
+  const el = document.getElementById('chat-messages');
+  const atBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 60;
+  const fmt = ts => ts ? new Date(ts).toLocaleTimeString('de-CH', { hour:'2-digit', minute:'2-digit' }) : '';
+  el.innerHTML = rows.map(m => {
+    const isMe = m.player_name === currentPlayer;
+    return `<div class="chat-msg">
+      <span class="chat-msg-name${isMe ? ' me' : ''}">${escHtml(m.player_name)}</span><span class="chat-msg-text">${escHtml(m.message)}</span><span class="chat-msg-time">${fmt(m.created_at)}</span>
+    </div>`;
+  }).join('');
+  if (atBottom) el.scrollTop = el.scrollHeight;
+}
+
+async function sendChatMessage() {
+  if (!currentPlayer) return;
+  const input = document.getElementById('chat-input');
+  const msg   = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  try {
+    await fetch(`${SB_URL}/chat_messages`, {
+      method: 'POST',
+      headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ player_name: currentPlayer, message: msg })
+    });
+  } catch(e) { console.warn('Chat send failed', e); }
+  await loadChat();
+}
+
+function startChatPoll() {
+  loadChat();
+  clearInterval(chatPollTimer);
+  chatPollTimer = setInterval(() => { if (chatOpen) loadChat(); }, 5000);
+}
+
+// ============================================================
 // EVENTS
 // ============================================================
 
-// Name-Input: Live-Feedback ob Spieler bekannt
+// Name input: live check
 let nameCheckTimer = null;
 document.getElementById('player-name-input').addEventListener('input', e => {
   const name = e.target.value.trim();
@@ -1507,6 +1690,7 @@ document.getElementById('player-name-input').addEventListener('input', e => {
   }, 500);
 });
 
+// Login
 document.getElementById('welcome-ok').addEventListener('click', async () => {
   const btn  = document.getElementById('welcome-ok');
   const name = document.getElementById('player-name-input').value.trim() || 'Anonym';
@@ -1514,29 +1698,34 @@ document.getElementById('welcome-ok').addEventListener('click', async () => {
   btn.textContent = '⏳ Lade...';
 
   currentPlayer = name;
-  balance = 1000; // Immer mit 1000 starten
   const saved = await loadPlayerFromDB(name);
   if (saved) {
-    // Highscore laden aber Balance immer auf 1000 zurücksetzen
+    // Spielstand wiederherstellen
+    balance              = saved.balance;
     currentHighscore     = saved.highscore;
     currentHighscoreDate = saved.highscore_date;
   } else {
+    // Neuer Spieler
+    balance              = 1000;
     currentHighscore     = 1000;
     currentHighscoreDate = new Date().toISOString();
+    await saveCurrentPlayer();
   }
-  // Sofort in DB speichern (neue Session mit 1000)
-  await saveCurrentPlayer();
 
   updateHUD();
   document.getElementById('player-name-display').textContent = name;
   document.getElementById('welcome-modal').classList.remove('show');
+  document.getElementById('chat-send-btn').disabled = false;
   btn.disabled = false;
   btn.textContent = 'EINTRETEN 💀';
   audioCtx.resume().then(() => startAmbient());
+  startChatPoll();
 });
 
+// Spin
 document.getElementById('spin-btn').addEventListener('click', doSpin);
 
+// Bet
 document.querySelectorAll('.bet-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
@@ -1545,18 +1734,31 @@ document.querySelectorAll('.bet-btn').forEach(btn => {
   });
 });
 
+// Autoplay
+document.querySelectorAll('.ap-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (autoPlaying) { stopAutoplay(); return; }
+    if (balance < currentBet) return;
+    document.querySelectorAll('.ap-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    startAutoplay(parseInt(btn.dataset.ap));
+  });
+});
+document.getElementById('ap-stop-btn').addEventListener('click', stopAutoplay);
+
+// Paytable
 document.getElementById('paytable-btn').addEventListener('click', () => {
   buildPaytable();
   document.getElementById('paytable-modal').classList.add('show');
 });
 
+// Highscores
 document.getElementById('highscores-btn').addEventListener('click', () => {
   document.querySelectorAll('.hs-tab').forEach(t => t.classList.remove('active'));
   document.querySelector('.hs-tab[data-period="all"]').classList.add('active');
   buildHighscores('all');
   document.getElementById('highscores-modal').classList.add('show');
 });
-
 document.querySelectorAll('.hs-tab').forEach(tab => {
   tab.addEventListener('click', () => {
     document.querySelectorAll('.hs-tab').forEach(t => t.classList.remove('active'));
@@ -1579,7 +1781,20 @@ document.getElementById('paytable-modal').addEventListener('click', e => {
     document.getElementById('paytable-modal').classList.remove('show');
 });
 
-// Keyboard: space = spin
+// Chat
+document.getElementById('chat-header').addEventListener('click', () => {
+  const body = document.getElementById('chat-body');
+  const icon = document.getElementById('chat-toggle-icon');
+  chatOpen = body.classList.toggle('open');
+  icon.textContent = chatOpen ? '▲' : '▼';
+  if (chatOpen) loadChat();
+});
+document.getElementById('chat-send-btn').addEventListener('click', sendChatMessage);
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); sendChatMessage(); }
+});
+
+// Space = spin
 document.addEventListener('keydown', e => {
   if (e.code === 'Space' && !document.getElementById('welcome-modal').classList.contains('show')) {
     e.preventDefault();
