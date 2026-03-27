@@ -849,9 +849,9 @@ const SYMBOLS = [
   { id: 'benno',     label: 'Benno',     type: 'img',   src: 'images/benno.jpg',     weight: 6 },
   { id: 'haus',      label: 'Haus',      type: 'img',   src: 'images/haus.jpg',      weight: 4 },
   { id: 'joint',     label: 'Joint/CBD', type: 'img',   src: 'images/joint.jpg',     weight: 3, wild: true },
-  { id: 'bier',      label: 'Bier',      type: 'img',   src: 'images/bier.jpg',      weight: 9 },
+  { id: 'bier',      label: 'Bier',      type: 'img',   src: 'images/bier.jpg',      weight: 8 },
   { id: 'slot',      label: 'Slot',      type: 'img',   src: 'images/slot.jpg',      weight: 2, scatter: true },
-  { id: 'skull',     label: 'Totenkopf', type: 'emoji', emoji: '💀',                weight: 14 },
+  { id: 'skull',     label: 'Totenkopf', type: 'emoji', emoji: '💀',                weight: 25 },
 ];
 
 const REELS = 5;
@@ -1254,7 +1254,7 @@ function evaluateWin() {
       }
       if (count === 2) { nearMiss = true; break; }
     }
-    if (nearMiss && Math.random() < 0.15) {
+    if (nearMiss && Math.random() < 0.07) {
       const nudgeWin = currentBet;
       balance += nudgeWin;
       updateHUD(nudgeWin);
